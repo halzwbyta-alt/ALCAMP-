@@ -1151,6 +1151,12 @@ body.light{background-image:none;}
         <div id="adm-squad-list"></div>
       </div>
       <div id="at-allsched" style="display:none;padding:0 14px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <button class="btn-xs" style="background:var(--bg3);" onclick="schedMonthNav(-1)"><i class="fas fa-chevron-right"></i></button>
+          <div id="allsched-month-label" style="flex:1;text-align:center;font-weight:700;font-size:13px;color:var(--tx);"></div>
+          <button class="btn-xs" style="background:var(--bg3);" onclick="schedMonthNav(1)"><i class="fas fa-chevron-left"></i></button>
+          <button class="btn-xs" style="background:var(--g);font-size:10px;" onclick="schedMonthNav(0)">اليوم</button>
+        </div>
         <div id="allsched-filter" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:6px;"></div>
         <div id="allsched-days" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;"></div>
         <div style="overflow-x:auto;"><div id="allsched-grid"></div></div>
@@ -1229,7 +1235,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v129';
+const APP_VER='v130';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -3552,24 +3558,32 @@ function confirmResetHesba(){
 
 // Admin All-Fields Schedule
 function renderAdminAllSched(ds){
-  // days strip
+  // حساب الشهر المعروض
+  const selDate=new Date(ds+'T00:00:00');
+  const yr=selDate.getFullYear(),mo=selDate.getMonth();
+  const today=new Date();const todayStr=localDateStr(today);
+  // تحديث عنوان الشهر
+  const lbl=document.getElementById('allsched-month-label');
+  if(lbl)lbl.textContent=`${MONTHS_AR_FULL[mo]} ${yr}`;
+  // أيام الشهر كاملاً في الشريط
   const dc=document.getElementById('allsched-days');
   dc.innerHTML='';
-  const today=new Date();
-  const maxDays=Math.max(...F.map(f=>f.advanceBookingDays||5),7);
-  for(let i=0;i<maxDays;i++){
-    const d=new Date(today);d.setDate(d.getDate()+i);
-    const dstr=localDateStr(d);
-    const dayNames=['ح','ن','ث','ر','خ','ج','س'];
+  const daysInMonth=new Date(yr,mo+1,0).getDate();
+  const dayNames=['ح','ن','ث','ر','خ','ج','س'];
+  for(let day=1;day<=daysInMonth;day++){
+    const dstr=`${yr}-${String(mo+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const d=new Date(dstr+'T00:00:00');
     const dn=dayNames[d.getDay()];
-    const dd=String(d.getDate()).padStart(2,'0');
-    const mm=String(d.getMonth()+1).padStart(2,'0');
+    const dd=String(day).padStart(2,'0');
+    const mm=String(mo+1).padStart(2,'0');
+    const isToday=dstr===todayStr;
     const btn=document.createElement('button');
     btn.className='pos-btn'+(dstr===ds?' on':'');
-    btn.style.cssText='flex:unset;padding:6px 10px;font-size:11px;white-space:nowrap;min-width:48px;';
-    btn.innerHTML=`<div style="font-weight:900;">${dn}</div><div style="font-size:10px;">${dd}/${mm}</div>`;
+    btn.style.cssText='flex:unset;padding:6px 10px;font-size:11px;white-space:nowrap;min-width:48px;'+(isToday?'border-color:var(--neon);':'');
+    btn.innerHTML=`<div style="font-weight:900;${isToday?'color:var(--neon);':''}">${dn}</div><div style="font-size:10px;">${dd}/${mm}</div>`;
     btn.onclick=()=>renderAdminAllSched(dstr);
     dc.appendChild(btn);
+    if(dstr===ds)setTimeout(()=>btn.scrollIntoView({inline:'center',behavior:'smooth'}),50);
   }
   _lastSchedDs=ds;
   // academy filter
@@ -3662,6 +3676,15 @@ function showFieldQR(fid){
 let _schedAcadFilter='all';
 function setSchedAcadFilter(v){_schedAcadFilter=v;renderAdminAllSched(_lastSchedDs||localDateStr());}
 let _lastSchedDs='';
+let _schedMonthOffset=0;
+const MONTHS_AR_FULL=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function schedMonthNav(dir){
+  if(dir===0){_schedMonthOffset=0;renderAdminAllSched(localDateStr());return;}
+  _schedMonthOffset+=dir;
+  const now=new Date();
+  const t=new Date(now.getFullYear(),now.getMonth()+_schedMonthOffset,1);
+  renderAdminAllSched(localDateStr(t));
+}
 function showQuickAction(title,info,btns){
   document.getElementById('qa-title').innerHTML=`<i class="fas fa-calendar-check" style="color:var(--amber);"></i> ${title}`;
   document.getElementById('qa-info').innerHTML=info;
