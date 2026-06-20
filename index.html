@@ -50,13 +50,23 @@ body.light{background-image:none;}
 #toast.s{border-color:var(--neon);color:var(--neon);}
 #toast.e{border-color:var(--red);color:var(--red);}
 #toast.i{border-color:var(--amber);color:var(--amber);}
-.hdr{padding:14px 18px 12px;background:linear-gradient(180deg,rgba(22,163,74,.08),transparent);
+.hdr{padding:8px 16px 7px;background:linear-gradient(180deg,rgba(22,163,74,.08),transparent);
   border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:200;backdrop-filter:blur(16px);}
-.hdr-row{display:flex;justify-content:space-between;align-items:center;}
-.logo{font-size:22px;font-weight:900;font-style:italic;color:var(--g);letter-spacing:-1px;text-shadow:0 0 24px var(--glow);}
+.hdr-row{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.logo{font-size:20px;font-weight:900;font-style:italic;color:var(--g);letter-spacing:-1px;text-shadow:0 0 24px var(--glow);}
 .logo b{color:var(--neon);}
-.greet{font-size:11px;color:var(--txm);margin-top:1px;}
-.hdr-btns{display:flex;gap:6px;align-items:center;}
+.greet{font-size:11px;color:var(--txm);margin-top:0;}
+.hdr-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+.hdr-btns{display:flex;gap:5px;align-items:center;flex-shrink:0;}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--bg0);border-top:1.5px solid var(--bdr);display:flex;z-index:300;padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(20px);}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;color:var(--txm);font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;padding:9px 0 7px;transition:color .2s;position:relative;}
+.bnav-item i{font-size:20px;transition:transform .25s cubic-bezier(.34,1.4,.64,1);}
+.bnav-item.active{color:var(--g);}
+.bnav-item.active i{transform:translateY(-3px);}
+.bnav-item::after{content:'';position:absolute;top:0;width:36%;height:2.5px;background:var(--g);border-radius:0 0 3px 3px;transform:scaleX(0);transition:transform .28s cubic-bezier(.34,1.4,.64,1);}
+.bnav-item.active::after{transform:scaleX(1);}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.panel-in{animation:panelIn .22s ease forwards;}
 .theme-btn{background:var(--bg3);border:1px solid var(--bdr);color:var(--txs);border-radius:8px;padding:6px 9px;cursor:pointer;font-size:13px;transition:all .2s;}
 .theme-btn:hover{border-color:var(--g);}
 .notif-btn{background:var(--bg3);border:1px solid var(--bdr);color:var(--txs);border-radius:8px;padding:6px 9px;cursor:pointer;font-size:13px;transition:all .2s;position:relative;}
@@ -283,7 +293,7 @@ body.light{background-image:none;}
 .monthly-slot:hover{border-color:var(--neon);}
 .monthly-slot.pick{border-color:var(--neon);background:rgba(74,222,128,.08);color:var(--neon);}
 
-.fab-suggest{position:fixed;bottom:76px;left:18px;width:44px;height:44px;border-radius:50%;background:var(--teal);color:#fff;border:none;cursor:pointer;z-index:150;box-shadow:0 4px 14px rgba(20,184,166,.35);display:flex;align-items:center;justify-content:center;font-size:16px;transition:transform .2s;}
+.fab-suggest{position:fixed;bottom:130px;left:18px;width:44px;height:44px;border-radius:50%;background:var(--teal);color:#fff;border:none;cursor:pointer;z-index:150;box-shadow:0 4px 14px rgba(20,184,166,.35);display:flex;align-items:center;justify-content:center;font-size:16px;transition:transform .2s;}
 .fab-suggest:hover{transform:scale(1.08);}
 /* ── Chat System ── */
 .cl-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--bdr);cursor:pointer;transition:background .15s;}
@@ -895,26 +905,19 @@ body.light{background-image:none;}
 <div id="v-app" style="display:none;">
   <div class="hdr">
     <div class="hdr-row">
-      <div><div class="logo">Al<b>camp</b></div><div class="greet" id="greet"></div><div style="font-size:9px;color:var(--txm);opacity:.4;" id="ver-label-app"></div></div>
+      <div class="hdr-left">
+        <div class="logo">Al<b>camp</b></div>
+        <div class="greet" id="greet"></div>
+      </div>
       <div class="hdr-btns">
-        <button class="notif-btn" id="notif-btn" onclick="openNotifs()" title="الإشعارات"><i class="fas fa-bell"></i></button>
+        <button class="notif-btn" id="notif-btn" onclick="openNotifs()" title="الإشعارات"><i class="fas fa-bell"></i><span class="badge" id="notif-badge" style="display:none;">0</span></button>
         <button class="theme-btn" onclick="toggleTheme()" title="تغيير الوضع"><i id="theme-icon" class="fas fa-moon"></i></button>
-        <button id="edit-profile-btn" class="theme-btn" onclick="openProfileEdit()" title="تعديل بياناتي" style="display:none;"><i class="fas fa-user-edit"></i></button>
-        <button class="btn-red" onclick="openM('m-logout')"><i class="fas fa-sign-out-alt"></i> خروج</button>
       </div>
     </div>
   </div>
 
   <!-- PLAYER -->
-  <div id="v-player" style="display:none;">
-    <div class="tabs" style="margin-top:12px;">
-      <div class="tab on" id="tp-v" onclick="playerTab('venues')">الملاعب</div>
-      <div class="tab" id="tp-b" onclick="playerTab('bookings')">حجوزاتي</div>
-      <div class="tab" id="tp-fav" onclick="playerTab('favs')">⭐ مفضلة</div>
-      <div class="tab" id="tp-cal" onclick="playerTab('calendar')">📅 تقويم</div>
-      <div class="tab" id="tp-squad" onclick="playerTab('squad')">🤝 فريق</div>
-      <div class="tab" id="tp-loyalty" onclick="playerTab('loyalty')">🏅 ولاء</div>
-    </div>
+  <div id="v-player" style="display:none;padding-bottom:68px;">
 
     <!-- VENUES -->
     <div id="pv-venues">
@@ -944,23 +947,7 @@ body.light{background-image:none;}
       <div id="my-waitlist-list"></div>
     </div>
 
-    <!-- FAVS -->
-    <div id="pv-favs" style="display:none;"><div id="fav-list"></div></div>
-
-    <!-- CALENDAR -->
-    <div id="pv-calendar" style="display:none;padding:14px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <button class="btn-xs" style="background:var(--bdr2);" onclick="calNav(-1)"><i class="fas fa-chevron-right"></i></button>
-        <span id="cal-month-label" style="font-weight:700;font-size:14px;"></span>
-        <button class="btn-xs" style="background:var(--bdr2);" onclick="calNav(1)"><i class="fas fa-chevron-left"></i></button>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px;">
-        <div class="cal-day-hdr">أح</div><div class="cal-day-hdr">اث</div><div class="cal-day-hdr">ثل</div>
-        <div class="cal-day-hdr">أر</div><div class="cal-day-hdr">خم</div><div class="cal-day-hdr">جم</div><div class="cal-day-hdr">سب</div>
-      </div>
-      <div class="cal-grid" id="cal-grid" style="gap:3px;"></div>
-      <div id="cal-detail" style="margin-top:12px;"></div>
-    </div>
+    <!-- FAVS and CALENDAR moved to profile tab -->
 
     <!-- SQUAD -->
     <div id="pv-squad" style="display:none;">
@@ -979,10 +966,7 @@ body.light{background-image:none;}
       <div id="squad-rank-view" style="display:none;padding:0 14px;"><div id="rank-list"></div></div>
     </div>
 
-    <!-- LOYALTY -->
-    <div id="pv-loyalty" style="display:none;padding:14px;">
-      <div id="loyalty-content"></div>
-    </div>
+    <!-- LOYALTY moved to profile tab -->
 
     <!-- BOOKING SCREEN -->
     <div id="bk-screen" style="display:none;" class="bk-screen">
@@ -1021,8 +1005,70 @@ body.light{background-image:none;}
       <div id="bk-reviews"></div>
     </div>
 
-    <a href="https://wa.me/218912904941" target="_blank" class="fab-whatsapp" title="تواصل معنا واتساب" style="position:fixed;bottom:18px;left:18px;width:48px;height:48px;border-radius:50%;background:#25D366;color:#fff;border:none;cursor:pointer;z-index:150;box-shadow:0 4px 14px rgba(37,211,102,.4);display:flex;align-items:center;justify-content:center;font-size:20px;text-decoration:none;"><i class="fab fa-whatsapp"></i></a>
+    <a href="https://wa.me/218912904941" target="_blank" class="fab-whatsapp" title="تواصل معنا واتساب" style="position:fixed;bottom:76px;left:18px;width:48px;height:48px;border-radius:50%;background:#25D366;color:#fff;border:none;cursor:pointer;z-index:150;box-shadow:0 4px 14px rgba(37,211,102,.4);display:flex;align-items:center;justify-content:center;font-size:20px;text-decoration:none;"><i class="fab fa-whatsapp"></i></a>
     <button class="fab-suggest" id="fab-suggest-btn" onclick="openM('m-suggest')" title="اقتراح تحسين" style="display:none;"><i class="fas fa-lightbulb"></i></button>
+
+    <!-- PROFILE TAB PANEL -->
+    <div id="pv-profile" style="display:none;padding:14px;">
+      <div class="card" style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:17px;font-weight:800;color:var(--tx);" id="prof-nm-disp"></div>
+            <div style="font-size:12px;color:var(--txm);margin-top:2px;" id="prof-ph-disp"></div>
+            <div style="font-size:11px;color:var(--txm);margin-top:2px;" id="prof-dob-disp"></div>
+          </div>
+          <div style="text-align:center;flex-shrink:0;margin-right:12px;">
+            <div style="font-size:24px;font-weight:900;color:var(--amber);" id="prof-pts-disp">0</div>
+            <div style="font-size:9px;color:var(--txm);">نقطة ولاء</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button id="edit-profile-btn" class="btn-xs" style="flex:1;background:var(--bg3);color:var(--tx);display:none;" onclick="openProfileEdit()"><i class="fas fa-user-edit"></i> تعديل بياناتي</button>
+        </div>
+      </div>
+      <!-- Sub tabs -->
+      <div class="tabs" style="margin:0 0 14px;">
+        <div class="tab on" id="tpp-favs" onclick="profileSub('favs')">⭐ المفضلة</div>
+        <div class="tab" id="tpp-loyalty" onclick="profileSub('loyalty')">🏅 الولاء</div>
+        <div class="tab" id="tpp-calendar" onclick="profileSub('calendar')">📅 تقويم</div>
+      </div>
+      <div id="pp-favs"><div id="fav-list"></div></div>
+      <div id="pp-loyalty" style="display:none;padding:2px 0;"><div id="loyalty-content"></div></div>
+      <div id="pp-calendar" style="display:none;padding:2px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <button class="btn-xs" style="background:var(--bdr2);" onclick="calNav(-1)"><i class="fas fa-chevron-right"></i></button>
+          <span id="cal-month-label" style="font-weight:700;font-size:14px;"></span>
+          <button class="btn-xs" style="background:var(--bdr2);" onclick="calNav(1)"><i class="fas fa-chevron-left"></i></button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px;">
+          <div class="cal-day-hdr">أح</div><div class="cal-day-hdr">اث</div><div class="cal-day-hdr">ثل</div>
+          <div class="cal-day-hdr">أر</div><div class="cal-day-hdr">خم</div><div class="cal-day-hdr">جم</div><div class="cal-day-hdr">سب</div>
+        </div>
+        <div class="cal-grid" id="cal-grid" style="gap:3px;"></div>
+        <div id="cal-detail" style="margin-top:12px;"></div>
+      </div>
+      <!-- Logout -->
+      <div style="margin-top:16px;">
+        <button class="btn red" onclick="openM('m-logout')" style="width:100%;"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
+      </div>
+      <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--txm);opacity:.4;" id="ver-label-app"></div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bnav" id="bnav-player">
+      <button class="bnav-item active" id="bnav-home" onclick="playerTab('venues')">
+        <i class="fas fa-home"></i><span>الرئيسية</span>
+      </button>
+      <button class="bnav-item" id="bnav-bk" onclick="playerTab('bookings')">
+        <i class="fas fa-calendar-check"></i><span>حجوزاتي</span>
+      </button>
+      <button class="bnav-item" id="bnav-squad" onclick="playerTab('squad')">
+        <i class="fas fa-users"></i><span>الفريق</span>
+      </button>
+      <button class="bnav-item" id="bnav-profile" onclick="playerTab('profile')">
+        <i class="fas fa-user-circle"></i><span>ملفي</span>
+      </button>
+    </nav>
   </div>
 
   <!-- VENDOR -->
@@ -1254,7 +1300,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v134';
+const APP_VER='v135';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -1905,7 +1951,7 @@ function boot(){
   if(CU.role==='player'){
     document.getElementById('greet').innerHTML=`أهلاً، <b>${CU.name}</b>`;
     document.getElementById('v-player').style.display='block';
-    document.getElementById('edit-profile-btn').style.display='inline-flex';
+    // profile edit button is in profile tab panel
     playerTab('venues');checkNotifications();
   }else if(CU.role==='vendor'){
     const _vf=F.find(x=>String(x.pin)===String(CU.pin));
@@ -1945,13 +1991,22 @@ function checkNotifications(){
 //  PLAYER TABS
 // ════════════════════════════════════════════════
 function playerTab(t){
-  // Apply visibility settings
-  const loyaltyTabEl=document.getElementById('tp-loyalty');
-  if(loyaltyTabEl)loyaltyTabEl.style.display=SETTINGS.loyaltyVisible===false?'none':'';
-  const map={venues:'tp-v',bookings:'tp-b',favs:'tp-fav',calendar:'tp-cal',squad:'tp-squad',loyalty:'tp-loyalty'};
-  Object.keys(map).forEach(x=>{document.getElementById(map[x]).classList.toggle('on',x===t);const el=document.getElementById('pv-'+x);if(el)el.style.display=x===t?'block':'none';});
+  // hide all content panels
+  ['venues','bookings','squad','profile'].forEach(id=>{
+    const el=document.getElementById('pv-'+id);if(el)el.style.display='none';
+  });
   document.getElementById('bk-screen').style.display='none';
-  // Apply league visibility whenever squad shown
+  // show target panel with animation
+  const target=document.getElementById('pv-'+t);
+  if(target){target.style.display='block';target.classList.remove('panel-in');void target.offsetWidth;target.classList.add('panel-in');}
+  // update bottom nav active state
+  const navMap={venues:'bnav-home',bookings:'bnav-bk',squad:'bnav-squad',profile:'bnav-profile'};
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  const activeBtn=document.getElementById(navMap[t]);
+  if(activeBtn)activeBtn.classList.add('active');
+  // render content
+  if(t==='venues')renderVenues();
+  if(t==='bookings'){bkSubTab('upcoming');setInterval(()=>{const el=document.getElementById('pv-bookings');if(el&&el.style.display!=='none')renderMyBk();},5000);}
   if(t==='squad'){
     const leagueVisible=SETTINGS.leagueVisible!==false;
     const leagueTabEl=document.getElementById('tsq-leagues');
@@ -1960,13 +2015,31 @@ function playerTab(t){
     if(leagueTabEl)leagueTabEl.style.display=leagueVisible?'':'none';
     if(rankTabEl)rankTabEl.style.display=leagueVisible?'':'none';
     if(leagueBtn)leagueBtn.style.display=leagueVisible?'':'none';
+    renderSquad();
   }
-  if(t==='venues')renderVenues();
-  if(t==='bookings'){bkSubTab('upcoming');setInterval(()=>{const el=document.getElementById('pv-bookings');if(el&&el.style.display!=='none')renderMyBk();},5000);}
+  if(t==='profile')renderProfileTab();
+}
+function profileSub(t){
+  ['favs','loyalty','calendar'].forEach(s=>{
+    const el=document.getElementById('pp-'+s);if(el)el.style.display='none';
+    const tab=document.getElementById('tpp-'+s);if(tab)tab.classList.remove('on');
+  });
+  const el=document.getElementById('pp-'+t);if(el)el.style.display='block';
+  const tab=document.getElementById('tpp-'+t);if(tab)tab.classList.add('on');
   if(t==='favs')renderFavs();
-  if(t==='calendar')renderCalendar();
-  if(t==='squad')renderSquad();
   if(t==='loyalty')renderLoyalty();
+  if(t==='calendar')renderCalendar();
+}
+function renderProfileTab(){
+  if(!CU)return;
+  const u=U.find(x=>x.phone===CU.phone)||CU;
+  const nm=document.getElementById('prof-nm-disp');if(nm)nm.textContent=u.name||CU.name;
+  const ph=document.getElementById('prof-ph-disp');if(ph)ph.textContent=u.phone||CU.phone;
+  const dobEl=document.getElementById('prof-dob-disp');
+  if(dobEl)dobEl.textContent=u.dob?`🎂 ${u.dob} (${new Date().getFullYear()-parseInt(u.dob)} سنة)`:'';
+  const ptsEl=document.getElementById('prof-pts-disp');if(ptsEl)ptsEl.textContent=u.points||0;
+  const editBtn=document.getElementById('edit-profile-btn');if(editBtn)editBtn.style.display='inline-flex';
+  profileSub('favs');
 }
 
 // ════════════════════════════════════════════════
@@ -1992,10 +2065,7 @@ function venueCardHtml(f){
       <div><strong style="font-size:15px;">${f.name}</strong>
         ${hasDisc?'<span style="font-size:10px;background:var(--amberbg);color:var(--amber);border-radius:5px;padding:1px 6px;margin-right:5px;">عروض</span>':''}
       </div>
-      <div style="display:flex;align-items:center;gap:5px;">
-        <button class="fav-btn${isFav?' on':''}" onclick="event.stopPropagation();toggleFav('${f.id}')"><i class="fas fa-star"></i></button>
-        <span style="color:var(--neon);font-weight:800;font-size:14px;">${f.price} د.ل/س${peakInfo}</span>
-      </div>
+      <button class="fav-btn${isFav?' on':''}" onclick="event.stopPropagation();toggleFav('${f.id}')"><i class="fas fa-star"></i></button>
     </div>
     <div style="font-size:12px;color:var(--txm);margin-bottom:10px;display:flex;gap:12px;flex-wrap:wrap;">
       <span><i class="fas fa-map-marker-alt"></i> ${f.location}</span>
@@ -2004,7 +2074,10 @@ function venueCardHtml(f){
       ${avg>0?`<span>${starsHtml(avg)} (${avg})</span>`:''}
       ${myBks>0?`<span style="color:var(--purple);">حجوزاتك: ${myBks}</span>`:''}
     </div>
-    <div style="pointer-events:none;"><div class="btn" style="font-size:13px;padding:10px;">احجز الآن <i class="fas fa-arrow-left"></i></div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;pointer-events:none;">
+      <span style="color:var(--neon);font-weight:800;font-size:15px;">${f.price} د.ل/س${peakInfo}</span>
+      <div class="btn" style="font-size:12px;padding:7px 14px;width:auto;flex-shrink:0;">احجز <i class="fas fa-arrow-left"></i></div>
+    </div>
     ${f.phone?`<div style="display:flex;gap:6px;margin-top:8px;pointer-events:auto;" onclick="event.stopPropagation();">
       <a href="tel:${f.phone}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.25);border-radius:9px;padding:7px;font-size:12px;font-weight:700;text-decoration:none;"><i class="fas fa-phone"></i> اتصال</a>
       <a href="https://wa.me/218${String(f.waPhone||f.phone).replace(/^0+/,'')}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(74,222,128,.1);color:var(--neon);border:1px solid rgba(74,222,128,.2);border-radius:9px;padding:7px;font-size:12px;font-weight:700;text-decoration:none;"><i class="fab fa-whatsapp"></i> واتساب</a>
