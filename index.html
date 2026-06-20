@@ -181,6 +181,9 @@ body.light{background-image:none;}
 body.light .adm-bnav{background:#ffffff;box-shadow:0 -2px 12px rgba(0,0,0,.07);}
 body.light .adm-bnav-item{color:#475569;}
 body.light .adm-bnav-item.active{color:var(--g);}
+body.light .tslot:not(.bk-ok):not(.bk-pend):not(.bk-mine):not(.closed){background:#F1F5F9;color:#0F172A;border-color:#e2e8f0;}
+body.light .dslot:not(.on){background:#F1F5F9;color:#0F172A;border-color:#e2e8f0;}
+body.light .pos-btn:not(.on){background:#F1F5F9;color:#334155;border-color:#e2e8f0;}
 /* ── Admin More Drawer ── */
 .adm-more-overlay{position:fixed;inset:0;z-index:400;display:none;pointer-events:none;}
 .adm-more-overlay.open{display:block;pointer-events:all;}
@@ -1400,7 +1403,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v140';
+const APP_VER='v141';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
