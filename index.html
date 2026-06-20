@@ -162,7 +162,7 @@ body.light{background-image:none;}
 .aig textarea{resize:none;height:80px;}
 .frow{display:flex;gap:8px;}.frow>*{flex:1;}
 .bk-screen{padding:14px 14px 150px;}
-.bk-confirm-bar{position:fixed;bottom:62px;left:0;right:0;padding:10px 14px;background:color-mix(in srgb,var(--bg1) 90%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bdr);z-index:250;display:none;}
+.bk-confirm-bar{position:fixed;bottom:62px;left:0;right:0;max-width:460px;margin:0 auto;padding:10px 14px;background:color-mix(in srgb,var(--bg1) 90%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bdr);z-index:200;display:none;}
 .bk-confirm-bar .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
 .back{display:flex;align-items:center;gap:6px;color:var(--txm);cursor:pointer;margin-bottom:14px;font-size:13px;font-weight:700;transition:color .18s;width:fit-content;}
 .back:hover{color:var(--tx);}
@@ -1309,7 +1309,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v136';
+const APP_VER='v137';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -2005,6 +2005,9 @@ function playerTab(t){
     const el=document.getElementById('pv-'+id);if(el)el.style.display='none';
   });
   document.getElementById('bk-screen').style.display='none';
+  document.getElementById('bk-confirm-bar').style.display='none';
+  const _fabW=document.querySelector('.fab-whatsapp');const _fabS=document.getElementById('fab-suggest-btn');
+  if(_fabW)_fabW.style.display='flex';if(_fabS&&CU&&CU.role==='player')_fabS.style.display='flex';
   // show target panel with animation
   const target=document.getElementById('pv-'+t);
   if(target){target.style.display='block';target.classList.remove('panel-in');void target.offsetWidth;target.classList.add('panel-in');}
@@ -2435,6 +2438,8 @@ function openBkScreen(fid){
   document.getElementById('pv-venues').style.display='none';
   document.getElementById('bk-screen').style.display='block';
   document.getElementById('bk-confirm-bar').style.display='block';
+  const _fabW2=document.querySelector('.fab-whatsapp');const _fabS2=document.getElementById('fab-suggest-btn');
+  if(_fabW2)_fabW2.style.display='none';if(_fabS2)_fabS2.style.display='none';
   ST='';updateBkBtn();
   document.getElementById('bk-name').textContent=SF.groupId&&academyFields.length>1?SF.groupName||SF.name:SF.name;
   const peakInfo=(SF.peakEnabled&&SF.peakPrice)?` | ذروة: ${SF.peakPrice} د.ل (${fmtH(SF.peakStart||0)}–${fmtH(SF.peakEnd||0)})`:'';
