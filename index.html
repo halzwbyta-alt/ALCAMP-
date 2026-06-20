@@ -372,7 +372,7 @@ body.light{background-image:none;}
     <input id="s-nm" type="text" class="inp" placeholder="الاسم الثنائي (مثال: محمد علي)">
     <input id="s-ph" type="tel" class="inp" placeholder="رقم هاتفك (09xxxxxxxx)">
     <input id="s-pin" type="password" class="inp" placeholder="رمز الدخول (4 أرقام فأكثر)">
-    <input id="s-dob" type="number" class="inp" placeholder="سنة الميلاد (مثال: 1995)" min="1950" max="2015" style="color:var(--txm);">
+    <input id="s-dob" type="number" class="inp" placeholder="سنة الميلاد (مثال: 1995)" min="1980" max="2017" style="color:var(--txm);">
     <button class="btn" onclick="doSignup()"><i class="fas fa-user-plus"></i> إنشاء الحساب</button>
   </div>
   <div class="sep">أو دخول خاص</div>
@@ -1235,7 +1235,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v131';
+const APP_VER='v132';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -1736,16 +1736,28 @@ async function doSignup(){
   if(!PHONE_RE.test(ph)){authMsg('رقم الهاتف غير صحيح');return;}
   if(pin.length<4){authMsg('الرمز يجب 4 خانات على الأقل');return;}
   if(U.find(x=>x.phone===ph)){authMsg('هذا الرقم مسجل مسبقاً');return;}
+  const dobYear=dob?parseInt(dob):0;
+  const suspiciousDob=dobYear&&(dobYear<1980||dobYear>2017);
   const otp=await genOtp(ph);
   document.getElementById('otp-val').value=String(otp);
   document.getElementById('otp-nm').value=nm;
   document.getElementById('otp-ph').value=ph;
   document.getElementById('otp-pin').value=pin;
   document.getElementById('otp-inp').value='';
-  document.getElementById('otp-demo-note').textContent='جاري إرسال الرمز على واتساب...';
   document.getElementById('otp-resend-btn').style.display='none';
   document.getElementById('otp-timer').textContent='';
   openM('m-otp');
+  if(suspiciousDob){
+    // تاريخ مشبوه - أرسل للأدمن وخلّ المستخدم ينتظر
+    const waNum='218'+ph.replace(/^0+/,'');
+    const waLink=`https://wa.me/${waNum}?text=${encodeURIComponent(`رمز التحقق الخاص بك في ALCAMP هو: *${otp}*`)}`;
+    const age=new Date().getFullYear()-dobYear;
+    sendTgNotif(`⚠️ <b>تسجيل مشبوه - تاريخ ميلاد غير عادي</b>\n📛 ${nm}\n📞 <code>${ph}</code>\n🎂 سنة الميلاد: ${dobYear} (العمر: ${age} سنة)\n\n🔢 رمز التحقق: <b>${otp}</b>\n<a href="${waLink}">📲 إرسال الرمز على واتساب</a>\n\nالمستخدم ينتظر - تواصل معه للتحقق من بياناته`);
+    document.getElementById('otp-demo-note').textContent='⏳ سيتم التواصل معك للتحقق من بياناتك';
+    localStorage.setItem('otp_last_'+ph,String(Date.now()));
+    startOtpTimer();
+    return;
+  }
   sendOtpRequest(ph,otp);
   startOtpTimer();
 }
@@ -1839,7 +1851,9 @@ async function verifyOtp(){
   await saveToSupabase();
   const waNum='218'+ph.replace(/^0+/,'');
   const waWelcome=`https://wa.me/${waNum}?text=${encodeURIComponent(`مرحباً ${nm} 👋\nأهلاً بك في تطبيق ALCAMP لحجز الملاعب 🏟️\nيمكنك الآن حجز ملعبك المفضل بسهولة!\n\n🔗 https://halzwbyta-alt.github.io/ALCAMP-/`)}`;
-  sendTgNotif(`👤 <b>مستخدم جديد</b>\n📛 ${nm}\n📞 <code>${ph}</code>\n\n<a href="${waWelcome}">💬 إرسال ترحيب على واتساب</a>\n🔗 https://halzwbyta-alt.github.io/ALCAMP-/`);
+  const dobYear2=dob?parseInt(dob):0;
+  const ageStr=dobYear2?(` | 🎂 ${dob} (${new Date().getFullYear()-dobYear2} سنة)`):'';
+  sendTgNotif(`👤 <b>مستخدم جديد</b>\n📛 ${nm}\n📞 <code>${ph}</code>${ageStr}\n\n<a href="${waWelcome}">💬 إرسال ترحيب على واتساب</a>\n🔗 https://halzwbyta-alt.github.io/ALCAMP-/`);
   CU=nu;addLog(`تسجيل حساب جديد: ${nm}`);boot();
 }
 function openPin(r){modalRole=r;document.getElementById('pin-ttl').textContent=r==='admin'?'رمز الإدارة':'رمز الملعب';document.getElementById('pin-inp').value='';openM('m-pin');setTimeout(()=>document.getElementById('pin-inp').focus(),300);}
