@@ -29,9 +29,14 @@
   --teal:#14b8a6;--tealbg:rgba(20,184,166,.12);
 }
 body.light{
-  --bg0:#f0f4f8;--bg1:#fff;--bg2:#f8fafc;--bg3:#e2e8f0;
-  --bdr:#cbd5e1;--bdr2:#94a3b8;--tx:#0f172a;--txm:#64748b;--txs:#475569;
+  --bg0:#F4F6F9;--bg1:#fff;--bg2:#f8fafc;--bg3:#edf0f4;
+  --bdr:#e2e8f0;--bdr2:#94a3b8;--tx:#0F172A;--txm:#64748B;--txs:#334155;
 }
+body.light .inp{background:#ffffff;border-color:#e2e8f0;}
+body.light .inp::placeholder{color:#94a3b8;}
+body.light .card{background:#ffffff;border-color:#e2e8f0;}
+body.light .bnav-item{color:#475569;}
+body.light .tab:not(.on){color:#475569;}
 *{box-sizing:border-box;margin:0;padding:0;}
 html{margin:0;padding:0;width:100%;overflow-x:hidden;}
 body{font-family:'Cairo',sans-serif;background:var(--bg0);color:var(--tx);transition:background .3s,color .3s;margin:0;padding:0;width:100%;overflow-x:hidden;
@@ -213,7 +218,7 @@ body.light{background-image:none;}
 .chart-bar-label{width:28px;color:var(--txm);text-align:center;flex-shrink:0;}
 .chart-bar-track{flex:1;background:var(--bg3);border-radius:4px;height:14px;position:relative;overflow:hidden;}
 .chart-bar-fill{height:100%;border-radius:4px;transition:width .6s cubic-bezier(.34,1.2,.64,1);}
-.chart-bar-val{width:38px;text-align:left;color:var(--neon);font-weight:700;flex-shrink:0;font-size:10px;}
+.chart-bar-val{width:44px;text-align:left;color:var(--neon);font-weight:800;flex-shrink:0;font-size:12px;}
 /* LOYALTY */
 .loyalty-bar-track{background:var(--bg3);border-radius:8px;height:10px;overflow:hidden;margin:6px 0;}
 .loyalty-bar-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--neon));border-radius:8px;transition:width .5s ease;}
@@ -819,9 +824,8 @@ body.light{background-image:none;}
     <div style="font-weight:700;font-size:14px;margin-bottom:6px;">🔔 إشعارات تيليغرام</div>
     <div style="font-size:11px;color:var(--txm);margin-bottom:10px;">تصلك رسالة فورية على تيليغرام عند كل حجز جديد — حتى لو التطبيق مغلق</div>
     <input type="text" id="tg-chat-id-inp" class="inp" placeholder="Chat ID" style="margin-bottom:6px;" autocomplete="off">
-    <button class="btn" onclick="saveTgSettings()"><i class="fas fa-save"></i> حفظ</button>
-    <div id="tg-status" style="font-size:12px;margin-top:6px;"></div>
-    <button class="btn" style="background:var(--blue);margin-top:6px;" onclick="testTgNotif()"><i class="fab fa-telegram"></i> إرسال رسالة تجريبية</button>
+    <div id="tg-status" style="font-size:12px;margin-top:2px;margin-bottom:6px;"></div>
+    <button class="btn" style="background:var(--blue);" onclick="saveAndTestTg()"><i class="fab fa-telegram"></i> حفظ واختبار الاتصال</button>
   </div>
   <div class="modal-acts">
     <button class="btn amber" onclick="saveLoyaltySettings()"><i class="fas fa-save"></i> حفظ الإعدادات</button>
@@ -1163,7 +1167,7 @@ body.light{background-image:none;}
           <input type="text" id="nf-nm" placeholder="اسم الملعب"><input type="text" id="nf-loc" placeholder="الموقع (الحي أو المنطقة)">
           <div style="display:flex;gap:6px;align-items:center;"><input type="text" id="nf-mapurl" placeholder="رابط الموقع على الخريطة (اختياري)" style="flex:1;"></div>
           <input type="text" id="nf-pr" placeholder="السعر الأساسي (د.ل/ساعة)"><input type="text" id="nf-pin" placeholder="رمز المالك (أرقام)">
-          <div class="frow"><select id="nf-s"><option value="">البدء</option></select><select id="nf-e"><option value="">الانتهاء</option></select></div>
+          <div class="frow"><select id="nf-s"><option value="">اختر ساعة الفتح</option></select><select id="nf-e"><option value="">اختر ساعة الإغلاق</option></select></div>
           <input type="number" id="nf-adv" placeholder="أيام الحجز المسبق" value="5" min="1" max="61">
           <div style="margin-bottom:8px;">
             <div style="font-size:12px;color:var(--txm);margin-bottom:6px;">🌙 ساعات الإغلاق الدائم (اضغط لتحديد الساعات المغلقة دائماً)</div>
@@ -1325,7 +1329,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v138';
+const APP_VER='v139';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -1438,6 +1442,10 @@ async function saveTgSettings(){
   await saveToSupabase();
   if(st)st.innerHTML='<span style="color:var(--neon);">✅ تم الحفظ</span>';
   toast('✅ تم حفظ إعدادات تيليغرام','s');
+}
+async function saveAndTestTg(){
+  await saveTgSettings();
+  if(SETTINGS.tgChatId)await testTgNotif();
 }
 // ── Telegram Bot Commands Polling ──
 let _tgOffset=0,_tgPollTimer=null;
@@ -1837,7 +1845,8 @@ async function doSignup(){
   if(pin.length<4){authMsg('الرمز يجب 4 خانات على الأقل');return;}
   if(U.find(x=>x.phone===ph)){authMsg('هذا الرقم مسجل مسبقاً');return;}
   const dobYear=dob?parseInt(dob):0;
-  const suspiciousDob=dobYear&&(dobYear<1980||dobYear>2017);
+  if(dob&&(isNaN(dobYear)||dobYear<1980||dobYear>2017)){authMsg('سنة الميلاد غير صحيحة — يجب أن تكون بين 1980 و 2017');return;}
+  const suspiciousDob=false;
   const otp=await genOtp(ph);
   document.getElementById('otp-val').value=String(otp);
   document.getElementById('otp-nm').value=nm;
@@ -3242,8 +3251,8 @@ function renderVendorStats(){
   <div class="chart-wrap">${chartHtml||'<div style="text-align:center;color:var(--txm);font-size:12px;">لا توجد بيانات</div>'}</div>
   <div class="hesba-grid">
     <div class="hesba-card"><div class="h-num">${approved.length}</div><div class="h-lbl">إجمالي الحجوزات</div></div>
-    <div class="hesba-card"><div class="h-num">${monthRevenue}</div><div class="h-lbl">إيراد الشهر (رس)</div></div>
-    <div class="hesba-card"><div class="h-num">${totalRevenue}</div><div class="h-lbl">إجمالي الإيرادات (رس)</div></div>
+    <div class="hesba-card"><div class="h-num">${monthRevenue}</div><div class="h-lbl">إيراد الشهر (د.ل)</div></div>
+    <div class="hesba-card"><div class="h-num">${totalRevenue}</div><div class="h-lbl">إجمالي الإيرادات (د.ل)</div></div>
     <div class="hesba-card"><div class="h-num">${approved.length>0?Math.round(totalRevenue/approved.length):0}</div><div class="h-lbl">متوسط الحجز (رس)</div></div>
   </div>
   <div class="stitle" style="padding:0;margin-bottom:8px;">⏰ أكثر الساعات حجزاً</div>
@@ -3362,7 +3371,7 @@ function saveAdvDays(fid){const f=F.find(x=>x.id===fid);const val=parseInt(docum
 function openProfileEdit(){document.getElementById('prof-nm').value=CU.name||'';document.getElementById('prof-ph').value=CU.phone||'';document.getElementById('prof-pin').value='';openM('m-profile');}
 // Weekly closed days
 function toggleWeeklyDay(fid,day,btn){const f=F.find(x=>x.id===fid);if(!f.weeklyClosedDays)f.weeklyClosedDays=[];const i=f.weeklyClosedDays.indexOf(day);if(i>-1){f.weeklyClosedDays.splice(i,1);btn.classList.remove('on');}else{f.weeklyClosedDays.push(day);btn.classList.add('on');}save();toast('تم حفظ إعدادات الإغلاق الأسبوعي ✅','s');}
-function buildPchPicker(containerId,selected){const c=document.getElementById(containerId);if(!c)return;c.innerHTML='';for(let i=0;i<24;i++){const btn=document.createElement('button');btn.type='button';btn.dataset.h=i;btn.textContent=fmtH(i);btn.style.cssText='padding:4px 8px;border-radius:6px;border:1.5px solid var(--bdr);background:var(--bg1);color:var(--tx);font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;';if(selected.includes(i)){btn.style.background='var(--red)';btn.style.color='#fff';btn.style.borderColor='var(--red)';btn.classList.add('on');}btn.onclick=function(){if(this.classList.contains('on')){this.classList.remove('on');this.style.background='var(--bg1)';this.style.color='var(--tx)';this.style.borderColor='var(--bdr)';}else{this.classList.add('on');this.style.background='var(--red)';this.style.color='#fff';this.style.borderColor='var(--red)';}};c.appendChild(btn);}}
+function buildPchPicker(containerId,selected){const c=document.getElementById(containerId);if(!c)return;c.innerHTML='';for(let i=0;i<24;i++){const btn=document.createElement('button');btn.type='button';btn.dataset.h=i;btn.textContent=fmtH(i);btn.style.cssText='padding:4px 8px;border-radius:6px;border:1.5px solid var(--bdr);background:var(--bg3);color:var(--tx);font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;';if(selected.includes(i)){btn.style.background='var(--red)';btn.style.color='#fff';btn.style.borderColor='var(--red)';btn.classList.add('on');}btn.onclick=function(){if(this.classList.contains('on')){this.classList.remove('on');this.style.background='var(--bg3)';this.style.color='var(--tx)';this.style.borderColor='var(--bdr)';}else{this.classList.add('on');this.style.background='var(--red)';this.style.color='#fff';this.style.borderColor='var(--red)';}};c.appendChild(btn);}}
 function savePermanentClosedHours(fid){const f=F.find(x=>x.id===fid);if(!f)return;const c=document.getElementById('pch-picker-'+fid);if(!c)return;f.permanentClosedHours=[];c.querySelectorAll('button.on').forEach(b=>f.permanentClosedHours.push(+b.dataset.h));save();saveToSupabase();toast('تم حفظ ساعات الإغلاق الدائم ✅','s');addLog(`تعديل ساعات الإغلاق: ${f.name}`);}
 // Discount slots
 function openDiscSlotModal(fid){fillHours('ds-start');fillHours('ds-end');document.getElementById('ds-disc').value='';document.getElementById('ds-label').value='';openM('m-disc-slot');}
@@ -3555,6 +3564,14 @@ function getAcademyCommData(groupId){
   const remain=Math.max(0,comm-settled);
   return{total,comm,settled,remain,fields};
 }
+function toggleHesbaAcc(gid){
+  const body=document.getElementById('acc-body-'+gid);
+  const chevron=document.getElementById('acc-chevron-'+gid);
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  if(chevron)chevron.style.transform=isOpen?'':'rotate(180deg)';
+}
 function renderHesba(){
   const c=document.getElementById('hesba-content');
   const rate=SETTINGS.commissionRate||10;
@@ -3619,19 +3636,27 @@ function renderHesba(){
     if(ga.total===0&&ga.settled===0&&ga.fields.every(f=>{const d=getFieldCommData(f.id);return d.count===0&&d.settled===0;}))return;
     const acIsClean=ga.remain===0&&ga.settled>0;
     academiesHtml+=`
-    <div style="border:2px solid rgba(139,92,246,.3);border-radius:14px;padding:14px;margin-bottom:14px;background:rgba(139,92,246,.04);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <div style="font-size:15px;font-weight:900;color:var(--purple);"><i class="fas fa-building" style="margin-left:6px;"></i>${g.name}</div>
-        <span style="font-size:11px;color:var(--txm);">${g.fields.length} ملاعب</span>
+    <div style="border:2px solid rgba(139,92,246,.3);border-radius:14px;margin-bottom:14px;overflow:hidden;">
+      <div onclick="toggleHesbaAcc('${gid}')" style="display:flex;justify-content:space-between;align-items:center;padding:14px;cursor:pointer;background:rgba(139,92,246,.06);user-select:none;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <i class="fas fa-building" style="color:var(--purple);font-size:15px;"></i>
+          <div>
+            <div style="font-size:15px;font-weight:900;color:var(--purple);">${g.name}</div>
+            <div style="font-size:10px;color:var(--txm);margin-top:1px;">${g.fields.length} ملاعب · ${ga.remain>0?`<span style="color:var(--red);font-weight:700;">متبقي ${ga.remain} د.ل</span>`:acIsClean?'<span style="color:var(--g);">✅ مُسكَّرة</span>':'لا توجد حجوزات'}</div>
+          </div>
+        </div>
+        <i id="acc-chevron-${gid}" class="fas fa-chevron-down" style="color:var(--purple);transition:transform .25s;"></i>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">
-        <div style="background:var(--bg1);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:14px;font-weight:900;color:var(--neon);">${ga.total}</div><div style="font-size:9px;color:var(--txm);">مبيعات د.ل</div></div>
-        <div style="background:var(--bg1);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:14px;font-weight:900;color:var(--amber);">${ga.comm}</div><div style="font-size:9px;color:var(--txm);">عمولة د.ل</div></div>
-        <div style="background:var(--bg1);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:14px;font-weight:900;color:${ga.remain>0?'var(--red)':'var(--g)'};">${ga.remain}</div><div style="font-size:9px;color:var(--txm);">متبقي د.ل</div></div>
+      <div id="acc-body-${gid}" style="display:none;padding:14px;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">
+          <div style="background:var(--bg0);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:14px;font-weight:900;color:var(--neon);">${ga.total}</div><div style="font-size:9px;color:var(--txm);">مبيعات د.ل</div></div>
+          <div style="background:var(--bg0);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:14px;font-weight:900;color:var(--amber);">${ga.comm}</div><div style="font-size:9px;color:var(--txm);">عمولة د.ل</div></div>
+          <div style="background:var(--bg0);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:14px;font-weight:900;color:${ga.remain>0?'var(--red)':'var(--g)'};">${ga.remain}</div><div style="font-size:9px;color:var(--txm);">متبقي د.ل</div></div>
+        </div>
+        ${acIsClean?`<div style="background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.25);border-radius:7px;padding:5px 10px;font-size:11px;color:var(--g);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:5px;"><i class="fas fa-check-double"></i> الأكاديمية بالكامل مُسكَّرة ✅</div>`:
+        ga.remain>0?`<button class="reset-btn" style="margin-bottom:10px;background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(139,92,246,.1));border-color:rgba(139,92,246,.4);color:var(--purple);" onclick="settleAcademy('${gid}','${g.name.replace(/'/g,"\\'")}')"><i class="fas fa-lock"></i> تسكير الأكاديمية بالكامل <span style="background:var(--red);color:#fff;border-radius:5px;padding:1px 8px;font-size:11px;margin-right:4px;">${ga.remain} د.ل</span></button>`:''}
+        ${g.fields.map(f=>fieldCard(f)).join('')}
       </div>
-      ${acIsClean?`<div style="background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.25);border-radius:7px;padding:5px 10px;font-size:11px;color:var(--g);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:5px;"><i class="fas fa-check-double"></i> الأكاديمية بالكامل مُسكَّرة ✅</div>`:
-      ga.remain>0?`<button class="reset-btn" style="margin-bottom:10px;background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(139,92,246,.1));border-color:rgba(139,92,246,.4);color:var(--purple);" onclick="settleAcademy('${gid}','${g.name.replace(/'/g,"\\'")}')"><i class="fas fa-lock"></i> تسكير الأكاديمية بالكامل <span style="background:var(--red);color:#fff;border-radius:5px;padding:1px 8px;font-size:11px;margin-right:4px;">${ga.remain} د.ل</span></button>`:''}
-      ${g.fields.map(f=>fieldCard(f)).join('')}
     </div>`;
   });
 
@@ -4231,14 +4256,14 @@ function renderSuggestions(){
   if(!SUGGESTIONS.length){c.innerHTML='<div class="empty"><i class="fas fa-lightbulb"></i><p>لا توجد اقتراحات بعد</p></div>';return;}
   SUGGESTIONS.forEach(s=>{c.innerHTML+=`<div class="card${!s.read?' bkcard pend':''}" style="margin-bottom:9px;border-right:4px solid var(--teal);">
     <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:5px;">
-      <strong style="font-size:13px;color:var(--teal);">💡 ${s.title}</strong>
+      <strong style="font-size:13px;color:var(--teal);word-break:break-word;overflow-wrap:break-word;display:block;max-width:220px;white-space:normal;">💡 ${s.title}</strong>
       <div style="display:flex;align-items:center;gap:6px;">
         ${!s.read?'<span class="notif-dot"></span>':''}
         <button onclick="deleteSugg(${s.id})" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:13px;padding:2px 4px;"><i class="fas fa-trash-alt"></i></button>
       </div>
     </div>
     <div style="font-size:12px;color:var(--txm);margin-bottom:6px;">${s.from} | <span dir="ltr">${s.phone}</span> | ${s.date} | <span style="color:var(--txm);">${timeAgo(s.id)}</span></div>
-    <div style="font-size:13px;">${s.body}</div>
+    <div style="font-size:13px;word-break:break-word;overflow-wrap:break-word;overflow:hidden;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;">${s.body}</div>
     ${!s.read?`<button class="btn-xs" style="background:var(--teal);margin-top:8px;" onclick="markSuggRead(${s.id})">تحديد كمقروء</button>`:''}</div>`;});
 }
 function markSuggRead(id){const s=SUGGESTIONS.find(x=>x.id===id);if(s){s.read=true;save();renderSuggestions();updateAdminSuggestBadge();}}
