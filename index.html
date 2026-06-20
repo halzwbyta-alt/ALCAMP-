@@ -169,6 +169,33 @@ body.light{background-image:none;}
 .bk-screen{padding:14px 14px 150px;}
 .bk-confirm-bar{position:fixed;bottom:62px;left:0;right:0;max-width:460px;margin:0 auto;padding:10px 14px;background:color-mix(in srgb,var(--bg1) 90%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bdr);z-index:200;display:none;}
 .bk-confirm-bar .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+/* ── Admin Bottom Nav ── */
+.adm-bnav{position:fixed;bottom:0;left:0;right:0;max-width:460px;margin:0 auto;background:var(--bg1);border-top:1.5px solid var(--bdr);display:flex;z-index:290;padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+.adm-bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;color:var(--txm);font-family:'Cairo',sans-serif;font-size:10px;font-weight:700;padding:9px 0 7px;transition:color .2s;position:relative;}
+.adm-bnav-item i{font-size:19px;transition:transform .25s cubic-bezier(.34,1.4,.64,1);}
+.adm-bnav-item.active{color:var(--g);}
+.adm-bnav-item.active i{transform:translateY(-3px);}
+.adm-bnav-item::after{content:'';position:absolute;top:0;left:15%;right:15%;height:2.5px;background:var(--g);border-radius:0 0 4px 4px;transform:scaleX(0);transition:transform .25s cubic-bezier(.34,1.4,.64,1);}
+.adm-bnav-item.active::after{transform:scaleX(1);}
+.adm-nav-badge{position:absolute;top:5px;right:calc(50% - 18px);background:var(--red);color:#fff;font-size:9px;font-weight:900;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;pointer-events:none;}
+body.light .adm-bnav{background:#ffffff;box-shadow:0 -2px 12px rgba(0,0,0,.07);}
+body.light .adm-bnav-item{color:#475569;}
+body.light .adm-bnav-item.active{color:var(--g);}
+/* ── Admin More Drawer ── */
+.adm-more-overlay{position:fixed;inset:0;z-index:400;display:none;pointer-events:none;}
+.adm-more-overlay.open{display:block;pointer-events:all;}
+.adm-more-backdrop{position:absolute;inset:0;background:rgba(2,6,23,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;transition:opacity .25s;}
+.adm-more-overlay.open .adm-more-backdrop{opacity:1;}
+.adm-more-panel{position:absolute;bottom:62px;left:0;right:0;max-width:460px;margin:0 auto;background:var(--bg1);border:1.5px solid var(--bdr);border-radius:18px 18px 0 0;padding:8px 4px 12px;transform:translateY(100%);transition:transform .28s cubic-bezier(.34,1.2,.64,1);}
+.adm-more-overlay.open .adm-more-panel{transform:translateY(0);}
+.adm-more-handle{width:36px;height:4px;background:var(--bdr2);border-radius:2px;margin:0 auto 14px;}
+.adm-more-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 12px;}
+.adm-more-btn{display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--bg2);border:1.5px solid var(--bdr);border-radius:13px;padding:11px 4px 9px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;color:var(--tx);transition:all .18s;position:relative;width:100%;}
+.adm-more-btn i{font-size:20px;color:var(--g);}
+.adm-more-btn:active{transform:scale(.93);}
+.adm-more-btn.active-more{background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.4);color:var(--g);}
+body.light .adm-more-panel{background:#ffffff;}
+body.light .adm-more-btn{background:#f8fafc;}
 .back{display:flex;align-items:center;gap:6px;color:var(--txm);cursor:pointer;margin-bottom:14px;font-size:13px;font-weight:700;transition:color .18s;width:fit-content;}
 .back:hover{color:var(--tx);}
 .vcard{background:var(--bg2);border-radius:13px;padding:14px;margin:0 14px 10px;border:1.5px solid var(--bdr);transition:all .2s;cursor:pointer;}
@@ -1132,7 +1159,7 @@ body.light{background-image:none;}
 
   <!-- ADMIN -->
   <div id="v-admin" style="display:none;">
-    <div id="adm-main">
+    <div id="adm-main" style="padding-bottom:72px;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px 0;">
         <div style="display:flex;flex-direction:column;gap:1px;">
           <div style="font-size:12px;color:var(--txm);">لوحة الإدارة</div>
@@ -1140,19 +1167,7 @@ body.light{background-image:none;}
         </div>
         <button onclick="adminRefresh()" style="display:flex;align-items:center;gap:5px;background:var(--bg2);border:1.5px solid var(--bdr);border-radius:9px;padding:6px 12px;color:var(--neon);font-size:12px;font-family:Cairo,sans-serif;cursor:pointer;"><i class="fas fa-sync-alt" id="refresh-ico"></i> تحديث</button>
       </div>
-      <div class="tabs" style="margin-top:8px;">
-        <div class="tab on" id="ta-fields" onclick="adminTab('fields')">الملاعب</div>
-        <div class="tab" id="ta-users" onclick="adminTab('users')">اللاعبين</div>
-        <div class="tab" id="ta-pending" onclick="adminTab('pending')">⏳ طلبات</div>
-        <div class="tab" id="ta-coupons" onclick="adminTab('coupons')">كوبونات</div>
-        <div class="tab" id="ta-hesba" onclick="adminTab('hesba')">💰 الحسبة</div>
-        <div class="tab" id="ta-stats" onclick="adminTab('stats')">📊 إحصاء</div>
-        <div class="tab" id="ta-suggest" onclick="adminTab('suggest')">💡 اقتراحات</div>
-        <div class="tab" id="ta-squad" onclick="adminTab('squad')">🤝 منشورات</div>
-        <div class="tab" id="ta-allsched" onclick="adminTab('allsched')">📅 جدول</div>
-        <div class="tab" id="ta-log" onclick="adminTab('log')">السجل</div>
-      </div>
-      <div id="adm-stats" class="stats" style="margin-top:4px;"></div>
+      <div id="adm-stats" class="stats" style="margin-top:6px;"></div>
       <!-- Fields -->
       <div id="at-fields">
         <div style="padding:0 14px;margin-bottom:12px;">
@@ -1273,6 +1288,59 @@ body.light{background-image:none;}
       <div class="back" style="padding:14px;margin-bottom:0;" onclick="closeAdmSched()"><i class="fas fa-arrow-right"></i> العودة</div>
       <div id="adm-sched-inner"></div>
     </div>
+
+    <!-- ADMIN BOTTOM NAV -->
+    <nav class="adm-bnav" id="adm-bnav">
+      <button class="adm-bnav-item active" id="adm-nav-fields" onclick="adminTab('fields')">
+        <i class="fas fa-futbol"></i><span>الملاعب</span>
+      </button>
+      <button class="adm-bnav-item" id="adm-nav-pending" onclick="adminTab('pending')" style="position:relative;">
+        <i class="fas fa-clock"></i><span>الطلبات</span>
+        <span id="adm-pending-dot" class="adm-nav-badge" style="display:none;"></span>
+      </button>
+      <button class="adm-bnav-item" id="adm-nav-hesba" onclick="adminTab('hesba')">
+        <i class="fas fa-coins"></i><span>الحسبة</span>
+      </button>
+      <button class="adm-bnav-item" id="adm-nav-stats" onclick="adminTab('stats')">
+        <i class="fas fa-chart-bar"></i><span>الإحصاء</span>
+      </button>
+      <button class="adm-bnav-item" id="adm-nav-more" onclick="toggleAdmMore()" style="position:relative;">
+        <i class="fas fa-ellipsis-h"></i><span>المزيد</span>
+        <span id="adm-more-dot" class="adm-nav-badge" style="display:none;"></span>
+      </button>
+    </nav>
+
+    <!-- ADMIN MORE DRAWER -->
+    <div class="adm-more-overlay" id="adm-more-overlay">
+      <div class="adm-more-backdrop" onclick="closeAdmMore()"></div>
+      <div class="adm-more-panel">
+        <div class="adm-more-handle"></div>
+        <div class="adm-more-grid">
+          <button class="adm-more-btn" id="adm-more-btn-users" onclick="adminTabMore('users')">
+            <i class="fas fa-users"></i><span>اللاعبين</span>
+          </button>
+          <button class="adm-more-btn" id="adm-more-btn-coupons" onclick="adminTabMore('coupons')">
+            <i class="fas fa-ticket-alt"></i><span>الكوبونات</span>
+          </button>
+          <button class="adm-more-btn" id="adm-more-btn-suggest" onclick="adminTabMore('suggest')" style="position:relative;">
+            <i class="fas fa-lightbulb"></i><span>الاقتراحات</span>
+            <span id="adm-sugg-dot2" class="adm-nav-badge" style="display:none;position:absolute;top:6px;right:6px;"></span>
+          </button>
+          <button class="adm-more-btn" id="adm-more-btn-squad" onclick="adminTabMore('squad')">
+            <i class="fas fa-handshake"></i><span>المنشورات</span>
+          </button>
+          <button class="adm-more-btn" id="adm-more-btn-allsched" onclick="adminTabMore('allsched')">
+            <i class="fas fa-calendar-alt"></i><span>الجدول</span>
+          </button>
+          <button class="adm-more-btn" id="adm-more-btn-log" onclick="adminTabMore('log')">
+            <i class="fas fa-list-alt"></i><span>السجل</span>
+          </button>
+          <button class="adm-more-btn" onclick="openM('m-loyalty-settings');closeAdmMore()">
+            <i class="fas fa-cog"></i><span>الإعدادات</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1332,7 +1400,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v139';
+const APP_VER='v140';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -1675,18 +1743,16 @@ function updateNotifBadge(){
 }
 // شارات الأدمن للتبويبات
 function updateAdminPendingBadge(){
-  const tab=document.getElementById('ta-pending');if(!tab)return;
   const count=B.filter(b=>b.status==='Pending').length;
-  let badge=tab.querySelector('.tab-badge');
-  if(count>0){if(!badge){badge=document.createElement('span');badge.className='tab-badge';tab.appendChild(badge);}badge.textContent=count;}
-  else if(badge)badge.remove();
+  const dot=document.getElementById('adm-pending-dot');
+  if(dot){dot.textContent=count>0?count:'';dot.style.display=count>0?'flex':'none';}
 }
 function updateAdminSuggestBadge(){
-  const tab=document.getElementById('ta-suggest');if(!tab)return;
   const count=SUGGESTIONS.filter(s=>!s.read).length;
-  let badge=tab.querySelector('.tab-badge');
-  if(count>0){if(!badge){badge=document.createElement('span');badge.className='tab-badge';tab.appendChild(badge);}badge.textContent=count;}
-  else if(badge)badge.remove();
+  const dot2=document.getElementById('adm-sugg-dot2');
+  const moreDot=document.getElementById('adm-more-dot');
+  if(dot2){dot2.textContent=count>0?count:'';dot2.style.display=count>0?'flex':'none';}
+  if(moreDot){moreDot.textContent=count>0?count:'';moreDot.style.display=count>0?'flex':'none';}
 }
 
 function updateVendorReqBadge(){
@@ -3484,11 +3550,20 @@ function removeVendorPhoto(idx){
 // ════════════════════════════════════════════════
 //  ADMIN
 // ════════════════════════════════════════════════
+const ADM_MAIN_TABS=['fields','users','pending','coupons','hesba','stats','suggest','squad','allsched','log'];
+const ADM_NAV_MAP={fields:'adm-nav-fields',pending:'adm-nav-pending',hesba:'adm-nav-hesba',stats:'adm-nav-stats'};
+let _admActiveTab='fields';
 function adminTab(t){
-  ['fields','users','pending','coupons','hesba','stats','suggest','squad','allsched','log'].forEach(x=>{
-    const ta=document.getElementById('ta-'+x);const at=document.getElementById('at-'+x);
-    if(ta)ta.classList.toggle('on',x===t);if(at)at.style.display=x===t?'block':'none';
-  });
+  _admActiveTab=t;
+  ADM_MAIN_TABS.forEach(x=>{const at=document.getElementById('at-'+x);if(at)at.style.display=x===t?'block':'none';});
+  // sync bottom nav
+  document.querySelectorAll('.adm-bnav-item').forEach(b=>b.classList.remove('active'));
+  const navBtn=ADM_NAV_MAP[t]?document.getElementById(ADM_NAV_MAP[t]):document.getElementById('adm-nav-more');
+  if(navBtn)navBtn.classList.add('active');
+  // sync more drawer active button
+  document.querySelectorAll('.adm-more-btn').forEach(b=>b.classList.remove('active-more'));
+  const moreBtn=document.getElementById('adm-more-btn-'+t);if(moreBtn)moreBtn.classList.add('active-more');
+  // render
   if(t==='fields')renderAdminFields();
   if(t==='allsched')renderAdminAllSched(localDateStr());
   if(t==='users')renderAdminUsers();
@@ -3500,6 +3575,18 @@ function adminTab(t){
   if(t==='squad')renderAdminSquad();
   if(t==='log')renderLog();
 }
+function toggleAdmMore(){
+  const o=document.getElementById('adm-more-overlay');
+  if(o.classList.contains('open'))closeAdmMore();
+  else{o.style.display='block';requestAnimationFrame(()=>o.classList.add('open'));}
+  document.getElementById('adm-nav-more').classList.toggle('active',!document.getElementById('adm-more-overlay').classList.contains('open')||true);
+}
+function closeAdmMore(){
+  const o=document.getElementById('adm-more-overlay');
+  o.classList.remove('open');
+  setTimeout(()=>{o.style.display='none';},300);
+}
+function adminTabMore(t){adminTab(t);closeAdmMore();}
 function renderAdminStats(){
   const groupCount=new Set(F.filter(f=>f.groupId).map(f=>f.groupId)).size;
   document.getElementById('adm-stats').innerHTML=`
@@ -3530,7 +3617,7 @@ function renderAdminStatsTab(){
   c.innerHTML=`
   <div class="stitle" style="padding:0;margin-bottom:8px;">📊 الحجوزات — آخر 7 أيام</div>
   <div class="chart-wrap">${bkChart||'<div style="text-align:center;color:var(--txm);font-size:12px;">لا توجد بيانات</div>'}</div>
-  <div class="stitle" style="padding:0;margin-bottom:8px;">💰 الإيراد — آخر 7 أيام (رس)</div>
+  <div class="stitle" style="padding:0;margin-bottom:8px;">💰 الإيراد — آخر 7 أيام (د.ل)</div>
   <div class="chart-wrap">${revChart||'<div style="text-align:center;color:var(--txm);font-size:12px;">لا توجد بيانات</div>'}</div>
   <div class="hesba-grid">
     <div class="hesba-card"><div class="h-num">${approved.length}</div><div class="h-lbl">إجمالي الحجوزات</div></div>
@@ -4140,9 +4227,7 @@ async function adminRefresh(){
   const ico=document.getElementById('refresh-ico');
   if(ico)ico.style.animation='spin 1s linear infinite';
   await reloadData();
-  const tabs=['fields','users','pending','coupons','hesba','stats','suggest','squad','allsched','log'];
-  const active=tabs.find(t=>{const el=document.getElementById('ta-'+t);return el&&el.classList.contains('on');});
-  if(active)adminTab(active);
+  adminTab(_admActiveTab||'fields');
   if(ico)ico.style.animation='';
   toast('تم التحديث ✅','s');
 }
