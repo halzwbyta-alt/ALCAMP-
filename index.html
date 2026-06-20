@@ -1235,7 +1235,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v130';
+const APP_VER='v131';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -1777,6 +1777,15 @@ async function genOtp(ph){
 function sendOtpRequest(ph,otp){
   const nm=document.getElementById('otp-nm').value||'';
   document.getElementById('otp-demo-note').textContent='جاري إرسال الرمز...';
+  // أرقام 093 (ليبيانا) - يُرسل الرمز للأدمن عبر تيليغرام
+  if(ph.startsWith('093')){
+    const waNum='218'+ph.replace(/^0+/,'');
+    const waSend=`https://wa.me/${waNum}?text=${encodeURIComponent(`رمز التحقق الخاص بك في ALCAMP هو: *${otp}*`)}`;
+    sendTgNotif(`🔑 <b>رمز تحقق - ليبيانا</b>\n📞 <code>${ph}</code>\n👤 ${nm}\n\n🔢 الرمز: <b>${otp}</b>\n\n<a href="${waSend}">📲 إرسال الرمز على واتساب</a>`);
+    document.getElementById('otp-demo-note').textContent='⏳ سيصلك الرمز قريباً على واتساب';
+    localStorage.setItem('otp_last_'+ph,String(Date.now()));
+    return;
+  }
   const s=getSupa();
   fetch('https://waqkjsdpbgxiraoigusn.supabase.co/functions/v1/smart-worker',{
     method:'POST',
@@ -1828,7 +1837,9 @@ async function verifyOtp(){
   U.push(nu);
   localStorage.setItem('db_users',JSON.stringify(U));
   await saveToSupabase();
-  sendTgNotif(`👤 <b>مستخدم جديد</b>\n📛 ${nm}\n📞 ${ph}\n\n🔗 https://halzwbyta-alt.github.io/ALCAMP-/`);
+  const waNum='218'+ph.replace(/^0+/,'');
+  const waWelcome=`https://wa.me/${waNum}?text=${encodeURIComponent(`مرحباً ${nm} 👋\nأهلاً بك في تطبيق ALCAMP لحجز الملاعب 🏟️\nيمكنك الآن حجز ملعبك المفضل بسهولة!\n\n🔗 https://halzwbyta-alt.github.io/ALCAMP-/`)}`;
+  sendTgNotif(`👤 <b>مستخدم جديد</b>\n📛 ${nm}\n📞 <code>${ph}</code>\n\n<a href="${waWelcome}">💬 إرسال ترحيب على واتساب</a>\n🔗 https://halzwbyta-alt.github.io/ALCAMP-/`);
   CU=nu;addLog(`تسجيل حساب جديد: ${nm}`);boot();
 }
 function openPin(r){modalRole=r;document.getElementById('pin-ttl').textContent=r==='admin'?'رمز الإدارة':'رمز الملعب';document.getElementById('pin-inp').value='';openM('m-pin');setTimeout(()=>document.getElementById('pin-inp').focus(),300);}
