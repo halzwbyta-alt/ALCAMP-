@@ -923,6 +923,22 @@ body.light{background-image:none;}
 
     <!-- VENUES -->
     <div id="pv-venues">
+      <!-- عداد الحجوزات -->
+      <div id="bk-counter-banner" style="display:none;margin:10px 14px 0;background:var(--bg2);border:1px solid var(--bdr);border-radius:11px;padding:10px 14px;justify-content:space-between;align-items:center;">
+        <span style="font-size:13px;color:var(--txm);">إجمالي حجوزاتك <b id="bk-count-num" style="color:var(--tx);font-size:15px;">0</b> حجز</span>
+        <span style="font-size:10px;font-weight:700;color:var(--g);background:rgba(22,163,74,.1);padding:3px 8px;border-radius:20px;">لاعب نشط ⚽</span>
+      </div>
+      <!-- رسالة 25 حجز -->
+      <div id="bk-promo-banner" style="display:none;margin:10px 14px 0;background:linear-gradient(135deg,rgba(22,163,74,.14),rgba(22,163,74,.04));border:1.5px solid rgba(22,163,74,.4);border-radius:12px;padding:12px 14px;">
+        <div style="font-size:13px;font-weight:800;color:var(--neon);margin-bottom:6px;">🎉 أنجزت 25 حجزاً!</div>
+        <div style="font-size:12px;color:var(--txm);line-height:1.7;margin-bottom:10px;">يمكنك التواصل معنا ليتم قبول حجوزاتك فوراً بدون تأخير</div>
+        <a href="https://wa.me/218912904941" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fab fa-whatsapp"></i> تواصل الآن</a>
+      </div>
+      <!-- المفضلة -->
+      <div id="home-fav-section" style="display:none;padding:10px 14px 0;">
+        <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:7px;"><i class="fas fa-star"></i> مفضلتك</div>
+        <div id="home-fav-list" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none;"></div>
+      </div>
       <div class="srch-wrap"><input class="srch" type="text" id="venue-q" placeholder="ابحث عن ملعب..." oninput="renderVenues()"></div>
       <div class="filter-bar" id="filter-bar">
         <button class="fbtn on" onclick="setFilter('all',this)">الكل</button>
@@ -1309,7 +1325,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v137';
+const APP_VER='v138';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -2017,7 +2033,7 @@ function playerTab(t){
   const activeBtn=document.getElementById(navMap[t]);
   if(activeBtn)activeBtn.classList.add('active');
   // render content
-  if(t==='venues')renderVenues();
+  if(t==='venues'){renderVenues();renderHomeFavs();renderBkCounter();}
   if(t==='bookings'){bkSubTab('upcoming');setInterval(()=>{const el=document.getElementById('pv-bookings');if(el&&el.style.display!=='none')renderMyBk();},5000);}
   if(t==='squad'){
     const leagueVisible=SETTINGS.leagueVisible!==false;
@@ -2162,6 +2178,25 @@ function renderVenues(){
 // ════════════════════════════════════════════════
 function toggleFav(fid){if(!CU.favs)CU.favs=[];const i=CU.favs.indexOf(fid);if(i>-1)CU.favs.splice(i,1);else CU.favs.push(fid);const u=U.find(x=>x.phone===CU.phone);if(u)u.favs=CU.favs;save();renderVenues();toast(CU.favs.includes(fid)?'أُضيف للمفضلة ⭐':'حُذف من المفضلة','i');}
 function toggleFavCurrent(){if(SF)toggleFav(SF.id);}
+function renderHomeFavs(){
+  const sec=document.getElementById('home-fav-section');
+  const c=document.getElementById('home-fav-list');
+  if(!sec||!c||!CU)return;
+  const favFs=F.filter(f=>(CU.favs||[]).includes(f.id)&&!f.isHidden);
+  if(!favFs.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  c.innerHTML=favFs.map(f=>`<div onclick="openBkScreen('${f.id}')" style="flex-shrink:0;background:var(--bg2);border:1.5px solid rgba(245,158,11,.4);border-radius:11px;padding:10px 12px;cursor:pointer;min-width:130px;max-width:160px;"><div style="font-size:12px;font-weight:700;color:var(--tx);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name}</div><div style="font-size:11px;color:var(--txm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><i class="fas fa-map-marker-alt" style="color:var(--amber);"></i> ${f.location}</div><div style="font-size:13px;font-weight:800;color:var(--neon);margin-top:4px;">${f.price} د.ل/س</div></div>`).join('');
+}
+function renderBkCounter(){
+  if(!CU)return;
+  const total=B.filter(b=>b.clientPhone===CU.phone&&b.status!=='Rejected').length;
+  const numEl=document.getElementById('bk-count-num');
+  const promoBanner=document.getElementById('bk-promo-banner');
+  const counterBanner=document.getElementById('bk-counter-banner');
+  if(numEl)numEl.textContent=total;
+  if(counterBanner)counterBanner.style.display=total>0?'flex':'none';
+  if(promoBanner)promoBanner.style.display=total>=25?'block':'none';
+}
 function renderFavs(){
   const c=document.getElementById('fav-list');c.innerHTML='';
   const favFs=F.filter(f=>(CU.favs||[]).includes(f.id)&&!f.isHidden);
