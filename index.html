@@ -1235,7 +1235,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v132';
+const APP_VER='v133';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -3904,7 +3904,7 @@ function openPlayerDetails(ph){
       <div style="font-size:12px;color:var(--txm);line-height:2;">
         📱 <span dir="ltr">${u.phone}</span><br>
         🔑 رمز: ${u.pin}<br>
-        🎂 العمر: ${age} سنة<br>
+        🎂 ${u.dob?`${u.dob} (${age} سنة)`:'لم يُدخل تاريخ ميلاد'}<br>
         🏅 النقاط: <b style="color:var(--amber);">${u.points||0}</b><br>
         📦 الحجوزات: ${bks.length}
         ${u.banned?'<br><span style="color:var(--red);">⛔ محظور</span>':''}
@@ -3982,7 +3982,7 @@ function renderAdminUsers(){
     const bkCount=B.filter(b=>b.clientPhone===u.phone&&b.status!=='Rejected').length;
     uc.innerHTML+=`<div class="card" style="cursor:pointer;${u.banned?'opacity:.5;border-color:rgba(239,68,68,.3);':''}" onclick="openPlayerDetails('${u.phone}')">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;"><strong>${u.name}${u.banned?' <span style="color:var(--red);font-size:10px;">(محظور)</span>':''}</strong><span class="bdg" style="background:${rbg};color:${rc2};">${rl}</span></div>
-      <div style="font-size:11px;color:var(--txm);margin-bottom:8px;"><span dir="ltr">${u.phone}</span> | رمز: ${u.pin}${u.role==='player'?` | 🎂 ${u.dob?new Date().getFullYear()-parseInt(u.dob)+' سنة':'—'} | 🏅 ${u.points||0} نقطة | ${bkCount} حجز`:''}</div>
+      <div style="font-size:11px;color:var(--txm);margin-bottom:8px;"><span dir="ltr">${u.phone}</span> | رمز: ${u.pin}${u.role==='player'?` | 🎂 ${u.dob?u.dob+' ('+( new Date().getFullYear()-parseInt(u.dob))+' سنة)':'—'} | 🏅 ${u.points||0} نقطة | ${bkCount} حجز`:''}</div>
       <div style="font-size:11px;color:var(--blue);"><i class="fas fa-chevron-left"></i> اضغط للتفاصيل</div>
     </div>`;
   });
