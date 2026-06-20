@@ -161,7 +161,9 @@ body.light{background-image:none;}
 .aig select option{background:var(--bg2);}
 .aig textarea{resize:none;height:80px;}
 .frow{display:flex;gap:8px;}.frow>*{flex:1;}
-.bk-screen{padding:14px;}
+.bk-screen{padding:14px 14px 150px;}
+.bk-confirm-bar{position:fixed;bottom:62px;left:0;right:0;padding:10px 14px;background:color-mix(in srgb,var(--bg1) 90%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--bdr);z-index:250;display:none;}
+.bk-confirm-bar .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
 .back{display:flex;align-items:center;gap:6px;color:var(--txm);cursor:pointer;margin-bottom:14px;font-size:13px;font-weight:700;transition:color .18s;width:fit-content;}
 .back:hover{color:var(--tx);}
 .vcard{background:var(--bg2);border-radius:13px;padding:14px;margin:0 14px 10px;border:1.5px solid var(--bdr);transition:all .2s;cursor:pointer;}
@@ -456,7 +458,7 @@ body.light{background-image:none;}
     <button class="btn-xs" style="background:var(--purple);height:auto;" onclick="applyCoupon()">تطبيق</button>
   </div>
   <div class="modal-acts">
-    <button class="btn" onclick="finalBook()"><i class="fas fa-paper-plane"></i> إرسال الطلب</button>
+    <button id="final-book-btn" class="btn" onclick="finalBook()"><i class="fas fa-paper-plane"></i> إرسال الطلب</button>
     <button class="btn-red" style="width:100%;justify-content:center;padding:12px;" onclick="closeM('m-bkconf')">تراجع</button>
   </div>
 </div></div>
@@ -992,7 +994,7 @@ body.light{background-image:none;}
         <div class="drow" id="days-c"></div>
         <div class="stitle" style="padding:0;margin-top:12px;">المواعيد المتاحة</div>
         <div class="tgrid" id="times-c"></div>
-        <button class="btn" id="bk-btn" style="display:none;margin-top:14px;" onclick="showBkModal()"><i class="fas fa-check-circle"></i> تأكيد الحجز</button>
+        <!-- bk-btn moved to fixed confirm bar -->
       </div>
       <div id="bk-monthly-sec" style="display:none;">
         <p style="font-size:12px;color:var(--txm);margin-bottom:10px;">اختر الوقت المفضل أسبوعياً لمدة شهر كامل (4 أسابيع)</p>
@@ -1052,6 +1054,13 @@ body.light{background-image:none;}
         <button class="btn red" onclick="openM('m-logout')" style="width:100%;"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
       </div>
       <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--txm);opacity:.4;" id="ver-label-app"></div>
+    </div>
+
+    <!-- BOOKING CONFIRM BAR -->
+    <div id="bk-confirm-bar" class="bk-confirm-bar">
+      <button id="bk-btn" class="btn" disabled onclick="showBkModal()">
+        <span id="bk-btn-text"><i class="fas fa-calendar-times"></i> اختر موعداً أولاً</span>
+      </button>
     </div>
 
     <!-- BOTTOM NAV -->
@@ -1300,7 +1309,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v135';
+const APP_VER='v136';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -2425,6 +2434,8 @@ function openBkScreen(fid){
   academyFields=SF.groupId?F.filter(f=>f.groupId===SF.groupId&&!f.isHidden):[SF];
   document.getElementById('pv-venues').style.display='none';
   document.getElementById('bk-screen').style.display='block';
+  document.getElementById('bk-confirm-bar').style.display='block';
+  ST='';updateBkBtn();
   document.getElementById('bk-name').textContent=SF.groupId&&academyFields.length>1?SF.groupName||SF.name:SF.name;
   const peakInfo=(SF.peakEnabled&&SF.peakPrice)?` | ذروة: ${SF.peakPrice} د.ل (${fmtH(SF.peakStart||0)}–${fmtH(SF.peakEnd||0)})`:'';
   document.getElementById('bk-price').textContent=SF.price+' د.ل/س'+peakInfo;
@@ -2449,7 +2460,7 @@ function openBkScreen(fid){
   document.getElementById('bk-fav-btn').classList.toggle('on',(CU.favs||[]).includes(SF.id));
   setBkType('single');buildDays('days-c',d=>{SD=d;renderClientSlots();},SF);renderBkReviews();
 }
-function hideBkScreen(){document.getElementById('bk-screen').style.display='none';document.getElementById('pv-venues').style.display='block';ST='';SF=null;appliedCoupon=null;}
+function hideBkScreen(){document.getElementById('bk-screen').style.display='none';document.getElementById('bk-confirm-bar').style.display='none';document.getElementById('pv-venues').style.display='block';ST='';SF=null;appliedCoupon=null;}
 function buildDays(cid,onSel,fObj){
   const daysCount=fObj&&fObj.advanceBookingDays?parseInt(fObj.advanceBookingDays):5;
   const c=document.getElementById(cid);c.innerHTML='';const today=new Date();
@@ -2463,7 +2474,7 @@ function buildDays(cid,onSel,fObj){
 }
 function renderClientSlots(){
   const c=document.getElementById('times-c');c.innerHTML='';
-  document.getElementById('bk-btn').style.display='none';ST='';
+  ST='';updateBkBtn();
   if(academyFields&&academyFields.length>1){
     // Multi-field academy view: table layout — union of all field hours, sorted
     const hourSet=new Set();
@@ -2513,7 +2524,7 @@ function renderClientSlots(){
       else{
         d.classList.add('free');
         d.innerHTML=`${t}<br><small style="color:${isDisc?'var(--amber)':'inherit'}">${slotPrice} د.ل${isDisc?'🏷️':''}</small>`;
-        d.onclick=function(){document.querySelectorAll('#times-c .tslot').forEach(e=>e.classList.remove('pick'));this.classList.add('pick');ST=t;document.getElementById('bk-btn').style.display='flex';};
+        d.onclick=function(){document.querySelectorAll('#times-c .tslot').forEach(e=>e.classList.remove('pick'));this.classList.add('pick');ST=t;updateBkBtn();};
       }
       c.appendChild(d);
     });
@@ -2524,7 +2535,7 @@ function selectAcademySlot(fid,time,el){
   el.classList.add('selected');
   SF=F.find(f=>f.id===fid)||SF;
   ST=time;
-  document.getElementById('bk-btn').style.display='flex';
+  updateBkBtn();
 }
 function renderBkReviews(){
   const c=document.getElementById('bk-reviews');if(!SF.reviews||!SF.reviews.length){c.innerHTML='';return;}
@@ -2545,6 +2556,19 @@ function showMonthlyBkModal(){
   document.getElementById('c-name').textContent=SF.name;document.getElementById('c-type').textContent='شهري';document.getElementById('c-date').textContent=`كل ${WEEKDAYS[selectedWeekDay]} - 4 أسابيع`;document.getElementById('c-time').textContent=selectedMonthlyTime;document.getElementById('c-coupon-row').style.display='none';document.getElementById('c-loyalty-row').style.display='none';document.getElementById('coupon-inp').value='';appliedCoupon=null;
   const price=getSlotPrice(SF,selectedMonthlyTime);
   document.getElementById('c-price').textContent=price*4+' د.ل (4 جلسات)';bkType='monthly';openM('m-bkconf');
+}
+function updateBkBtn(){
+  const btn=document.getElementById('bk-btn');
+  const txt=document.getElementById('bk-btn-text');
+  if(!btn||!txt)return;
+  if(!ST||!SF){
+    btn.disabled=true;
+    txt.innerHTML='<i class="fas fa-clock" style="opacity:.5;"></i> اختر موعداً أولاً';
+  }else{
+    btn.disabled=false;
+    const price=getSlotPrice(SF,ST);
+    txt.innerHTML=`<i class="fas fa-check-circle"></i> تأكيد الحجز · <b style="font-size:16px;">${price} د.ل</b>`;
+  }
 }
 function showBkModal(){
   const existingBk=B.find(b=>b.fieldId===SF.id&&b.date===SD&&b.time===ST&&(b.status==='Pending'||b.status==='Approved'));
@@ -2571,7 +2595,9 @@ function applyCoupon(){
   toast(`تم تطبيق خصم ${cp.disc}% ✅`,'s');
 }
 function finalBook(){
-  if(!SF){toast('خطأ: لم يتم اختيار الملعب','e');return;}
+  const fbBtn=document.getElementById('final-book-btn');
+  if(fbBtn){fbBtn.disabled=true;fbBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جاري الحجز...';}
+  if(!SF){if(fbBtn){fbBtn.disabled=false;fbBtn.innerHTML='<i class="fas fa-paper-plane"></i> إرسال الطلب';}toast('خطأ: لم يتم اختيار الملعب','e');return;}
   const isMonthly=bkType==='monthly';
   if(!isMonthly&&!ST){toast('اختر وقتاً أولاً','e');return;}
   if(isMonthly&&(!selectedWeekDay&&selectedWeekDay!==0)){toast('اختر اليوم الأسبوعي أولاً','e');return;}
