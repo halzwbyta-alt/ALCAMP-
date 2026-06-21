@@ -1,4 +1,5 @@
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
+// v142
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
