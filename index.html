@@ -1132,13 +1132,15 @@ body.light .adm-more-btn{background:#f8fafc;}
 
   <!-- VENDOR -->
   <div id="v-vendor" style="display:none;">
-    <div class="tabs" style="margin-top:12px;">
-      <div class="tab on" id="tv-req" onclick="vendorTab('req')">الطلبات</div>
-      <div class="tab" id="tv-sched" onclick="vendorTab('sched')">الجدول</div>
-      <div class="tab" id="tv-fin" onclick="vendorTab('fin')">المالية</div>
-      <div class="tab" id="tv-stats" onclick="vendorTab('stats')">📊 إحصاء</div>
-      <div class="tab" id="tv-set" onclick="vendorTab('set')">إعدادات</div>
+    <!-- Vendor Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px 6px;border-bottom:1px solid var(--bdr);">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--tx);" id="vendor-hdr-name">لوحة المالك</div>
+        <div style="font-size:10px;color:var(--txm);" id="vendor-hdr-field"></div>
+      </div>
+      <button onclick="openM('m-logout')" style="display:flex;align-items:center;gap:5px;background:var(--redbg);border:1.5px solid rgba(239,68,68,.3);border-radius:9px;padding:6px 12px;color:var(--red);font-size:12px;font-family:Cairo,sans-serif;cursor:pointer;"><i class="fas fa-sign-out-alt"></i> خروج</button>
     </div>
+    <div id="vendor-main" style="padding-bottom:72px;">
     <div id="vt-req">
       <div class="stitle">حجوزات: <span id="v-fname" style="color:var(--amber);font-style:italic;"></span></div>
       <div id="v-field-filter" style="display:none;padding:0 14px 8px;"></div>
@@ -1156,8 +1158,27 @@ body.light .adm-more-btn{background:#f8fafc;}
     </div>
     <div id="vt-fin" style="display:none;padding:0 14px;"><div id="vendor-fin-content"></div></div>
     <div id="vt-stats" style="display:none;padding:0 14px;"><div id="vendor-stats-content"></div></div>
-    <div id="vt-set" style="display:none;padding:0 14px;"><div id="vendor-set-content"></div>
-  </div>
+    <div id="vt-set" style="display:none;padding:0 14px;"><div id="vendor-set-content"></div></div>
+    </div>
+    <!-- Vendor Bottom Nav -->
+    <nav class="adm-bnav" id="vendor-bnav">
+      <button class="adm-bnav-item active" id="vn-req" onclick="vendorTab('req')">
+        <i class="fas fa-clock"></i><span>الطلبات</span>
+        <span id="vendor-req-badge" class="adm-nav-badge" style="display:none;"></span>
+      </button>
+      <button class="adm-bnav-item" id="vn-sched" onclick="vendorTab('sched')">
+        <i class="fas fa-calendar-alt"></i><span>الجدول</span>
+      </button>
+      <button class="adm-bnav-item" id="vn-fin" onclick="vendorTab('fin')">
+        <i class="fas fa-coins"></i><span>المالية</span>
+      </button>
+      <button class="adm-bnav-item" id="vn-stats" onclick="vendorTab('stats')">
+        <i class="fas fa-chart-bar"></i><span>الإحصاء</span>
+      </button>
+      <button class="adm-bnav-item" id="vn-set" onclick="vendorTab('set')">
+        <i class="fas fa-cog"></i><span>الإعدادات</span>
+      </button>
+    </nav>
   </div>
 
   <!-- ADMIN -->
@@ -1406,7 +1427,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v142';
+const APP_VER='v143';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -1762,13 +1783,12 @@ function updateAdminSuggestBadge(){
 }
 
 function updateVendorReqBadge(){
-  const tab=document.getElementById('tv-req');if(!tab||!CU)return;
+  if(!CU)return;
   const vfs=F.filter(f=>String(f.pin)===String(CU.pin));
   const ids=vfs.map(f=>String(f.id));
   const count=B.filter(b=>ids.includes(String(b.fieldId))&&b.status==='Pending').length;
-  let badge=tab.querySelector('.tab-badge');
-  if(count>0){if(!badge){badge=document.createElement('span');badge.className='tab-badge';tab.appendChild(badge);}badge.textContent=count;}
-  else if(badge)badge.remove();
+  const dot=document.getElementById('vendor-req-badge');
+  if(dot){dot.textContent=count>0?count:'';dot.style.display=count>0?'flex':'none';}
 }
 // تحديث شامل للشارات عند بداية الجلسة
 async function refreshAllBadges(){
@@ -3177,9 +3197,15 @@ function openFullDay(){
 // ════════════════════════════════════════════════
 function vendorTab(t){
   ['req','sched','fin','stats','set'].forEach(x=>{
-    const ta=document.getElementById('tv-'+x);const at=document.getElementById('vt-'+x);
-    if(ta)ta.classList.toggle('on',x===t);if(at)at.style.display=x===t?'block':'none';
+    const at=document.getElementById('vt-'+x);
+    if(at)at.style.display=x===t?'block':'none';
   });
+  // sync bottom nav
+  document.querySelectorAll('#vendor-bnav .adm-bnav-item').forEach(b=>b.classList.remove('active'));
+  const vb=document.getElementById('vn-'+t);if(vb)vb.classList.add('active');
+  // update header field name
+  if(CU){const hf=document.getElementById('vendor-hdr-field');const hn=document.getElementById('vendor-hdr-name');if(hn)hn.textContent=CU.name||'لوحة المالك';if(hf){const vfs=F.filter(f=>String(f.pin)===String(CU.pin));hf.textContent=vfs.length>1?`${vfs.length} ملاعب`:vfs[0]?.name||'';}}
+
   if(t==='req')renderVendorBk();
   if(t==='sched'){
     const vfs=F.filter(f2=>String(f2.pin)===String(CU.pin));
