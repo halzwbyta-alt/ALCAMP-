@@ -1,17 +1,17 @@
 name: Build Alcamp APK
 
 on:
-  push:
-    paths:
-      - 'android-app/**'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout android-app source
         uses: actions/checkout@v4
+        with:
+          repository: ALCAMP-Stadiums/ALCAMP-
+          ref: claude/alcamp-stadium-app-xnct4z
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -28,9 +28,7 @@ jobs:
         run: chmod +x android-app/gradlew
 
       - name: Build Debug APK
-        run: |
-          cd android-app
-          ./gradlew assembleDebug --no-daemon
+        run: cd android-app && ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
