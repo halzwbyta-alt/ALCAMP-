@@ -1,0 +1,23 @@
+name: Sync Web Files
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch updated web files
+        run: |
+          curl -L "https://raw.githubusercontent.com/ALCAMP-Stadiums/ALCAMP-/claude/alcamp-stadium-app-xnct4z/index.html" -o index.html
+          curl -L "https://raw.githubusercontent.com/ALCAMP-Stadiums/ALCAMP-/claude/alcamp-stadium-app-xnct4z/sw.js" -o sw.js
+
+      - name: Commit and push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add index.html sw.js
+          git diff --staged --quiet || git commit -m "Sync web files from dev"
+          git push
