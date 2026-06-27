@@ -220,9 +220,16 @@ body.light .adm-more-btn{background:#f8fafc;}
 .vbcard.no{border-right-color:var(--red);opacity:.6;}
 .cancelled-row{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:7px;padding:5px 10px;margin-top:7px;font-size:11px;color:var(--amber);font-weight:700;display:flex;align-items:center;gap:5px;}
 .stats{display:flex;gap:7px;padding:0 14px;margin-bottom:13px;}
-.scard{flex:1;background:var(--bg2);border:1px solid var(--bdr);border-radius:11px;padding:10px 6px;text-align:center;}
-.scard .n{font-size:21px;font-weight:900;color:var(--neon);}
-.scard .l{font-size:10px;color:var(--txm);margin-top:1px;}
+.scard{flex:1;background:var(--bg2);border:1px solid var(--bdr);border-radius:11px;padding:12px 6px 10px;text-align:center;border-bottom:3px solid var(--bdr2);}
+.scard.brd-g{border-bottom-color:var(--g);}
+.scard.brd-p{border-bottom-color:var(--purple);}
+.scard.brd-a{border-bottom-color:var(--amber);}
+.scard .n{font-size:24px;font-weight:900;color:var(--neon);}
+.scard .l{font-size:10px;color:var(--txm);margin-top:2px;font-weight:600;}
+/* panel title accent */
+.ptitle{font-size:14px;font-weight:800;color:var(--tx);padding-right:10px;border-right:3px solid var(--g);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.ptitle.purple{border-right-color:var(--purple);}
+.ptitle.amber{border-right-color:var(--amber);}
 /* HESBA */
 .hesba-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
 .hesba-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:11px;padding:12px;text-align:center;}
@@ -816,81 +823,7 @@ body.light .adm-more-btn{background:#f8fafc;}
   </div>
 </div></div>
 
-<!-- LOYALTY ADMIN SETTINGS MODAL -->
-<div id="m-loyalty-settings" class="overlay"><div class="modal">
-  <p class="modal-title" style="color:var(--amber);"><i class="fas fa-sliders-h"></i> إعدادات النظام</p>
-  <div class="aig">
-    <label style="font-size:12px;color:var(--txm);margin-bottom:4px;display:block;">نقاط لكل حجز</label>
-    <input type="number" id="ls-ppb" placeholder="نقاط لكل حجز (افتراضي: 10)">
-    <label style="font-size:12px;color:var(--txm);margin-bottom:4px;display:block;">معدل الاستبدال (نقاط = 1 دينار)</label>
-    <input type="number" id="ls-rate" placeholder="نقطة = 1 د.ل (افتراضي: 100)">
-  </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bdr);">
-    <span style="font-weight:700;font-size:14px;">تفعيل نظام الولاء</span>
-    <div class="toggle-sw" id="loyalty-master-toggle" onclick="toggleLoyaltyMaster()"></div>
-  </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bdr);">
-    <div>
-      <div style="font-weight:700;font-size:14px;">إظهار تبويب الولاء للاعبين</div>
-      <div style="font-size:11px;color:var(--txm);">إخفاء قسم الولاء من واجهة اللاعب</div>
-    </div>
-    <div class="toggle-sw" id="loyalty-visible-toggle" onclick="toggleLoyaltyVisible()"></div>
-  </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bdr);">
-    <div>
-      <div style="font-weight:700;font-size:14px;">إظهار نظام الدوري والترتيب</div>
-      <div style="font-size:11px;color:var(--txm);">إخفاء الدوريات والترتيب من الفريق</div>
-    </div>
-    <div class="toggle-sw" id="league-visible-toggle" onclick="toggleLeagueVisible()"></div>
-  </div>
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bdr);">
-    <div>
-      <div style="font-weight:700;font-size:14px;">إلزامية حقول منشورات الفريق</div>
-      <div style="font-size:11px;color:var(--txm);">إذا مفعّل، اللاعب لازم يملأ كل الحقول قبل النشر</div>
-    </div>
-    <div class="toggle-sw" id="post-require-toggle" onclick="togglePostRequire()"></div>
-  </div>
-  <div style="padding:10px 0;border-top:1px solid var(--bdr);">
-    <div style="font-weight:700;font-size:14px;margin-bottom:8px;">⚡ سرعة تحديث البيانات</div>
-    <div style="font-size:11px;color:var(--txm);margin-bottom:8px;">كل كم ثانية يتحقق التطبيق من وجود تغييرات جديدة</div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button class="pos-btn" id="poll-btn-5"  data-sec="5"  onclick="setPollInterval(5)">5 ث  (سريع)</button>
-      <button class="pos-btn" id="poll-btn-10" data-sec="10" onclick="setPollInterval(10)">10 ث</button>
-      <button class="pos-btn on" id="poll-btn-15" data-sec="15" onclick="setPollInterval(15)">15 ث (افتراضي)</button>
-      <button class="pos-btn" id="poll-btn-30" data-sec="30" onclick="setPollInterval(30)">30 ث</button>
-      <button class="pos-btn" id="poll-btn-60" data-sec="60" onclick="setPollInterval(60)">60 ث (موفّر)</button>
-    </div>
-  </div>
-  <div class="card" style="margin-top:8px;">
-    <div style="font-weight:700;font-size:14px;margin-bottom:6px;">🔔 إشعارات تيليغرام</div>
-    <div style="font-size:11px;color:var(--txm);margin-bottom:10px;">تصلك رسالة فورية على تيليغرام عند كل حجز جديد — حتى لو التطبيق مغلق</div>
-    <input type="text" id="tg-chat-id-inp" class="inp" placeholder="Chat ID" style="margin-bottom:6px;" autocomplete="off">
-    <div id="tg-status" style="font-size:12px;margin-top:2px;margin-bottom:6px;"></div>
-    <button class="btn" style="background:var(--blue);" onclick="saveAndTestTg()"><i class="fab fa-telegram"></i> حفظ واختبار الاتصال</button>
-  </div>
-  <div class="card" style="margin-top:8px;">
-    <div style="font-weight:700;font-size:14px;margin-bottom:6px;">📱 إشعارات التطبيق (OneSignal)</div>
-    <div style="font-size:11px;color:var(--txm);margin-bottom:10px;">أرسل إشعار فوري لجميع مستخدمي التطبيق — احصل على REST API Key من OneSignal Dashboard ← Settings ← Keys & IDs</div>
-    <input type="password" id="os-api-key-inp" class="inp" placeholder="REST API Key" style="margin-bottom:6px;" autocomplete="off">
-    <div id="os-status" style="font-size:12px;margin-top:2px;margin-bottom:8px;"></div>
-    <button class="btn" style="background:var(--purple);margin-bottom:6px;width:100%;" onclick="saveAndTestOsNotif()"><i class="fas fa-key"></i> حفظ المفتاح</button>
-    <button class="btn" style="background:var(--neon);color:#000;width:100%;" onclick="sendTestPushNotif()"><i class="fas fa-bell"></i> إرسال إشعار تجريبي للجميع</button>
-  </div>
-  <div class="card" style="margin-top:8px;">
-    <div style="font-weight:700;font-size:14px;margin-bottom:4px;">✏️ قوالب رسائل التأكيد</div>
-    <div style="font-size:11px;color:var(--txm);margin-bottom:10px;">المتغيرات المتاحة: <span style="color:var(--neon);">{اسم} {ملعب} {تاريخ} {وقت} {نوع} {مبلغ} {سبب}</span></div>
-    <label style="font-size:12px;color:var(--txm);display:block;margin-bottom:4px;">✅ رسالة القبول</label>
-    <textarea id="msg-approve-tpl" class="inp" rows="3" style="resize:vertical;font-size:13px;line-height:1.6;" placeholder="✅ تم قبول حجزك في {ملعب}&#10;📅 {تاريخ} — {وقت}&#10;🏷 {نوع}&#10;💰 المبلغ: {مبلغ} د.ل"></textarea>
-    <label style="font-size:12px;color:var(--txm);display:block;margin-top:8px;margin-bottom:4px;">❌ رسالة الرفض</label>
-    <textarea id="msg-reject-tpl" class="inp" rows="3" style="resize:vertical;font-size:13px;line-height:1.6;" placeholder="❌ تم رفض حجزك في {ملعب}&#10;📅 {تاريخ} — {وقت}&#10;📝 السبب: {سبب}"></textarea>
-    <button class="btn" style="background:var(--g);width:100%;margin-top:8px;" onclick="saveMsgTemplates()"><i class="fas fa-save"></i> حفظ القوالب</button>
-  </div>
-  <div class="modal-acts">
-    <button class="btn amber" onclick="saveLoyaltySettings()"><i class="fas fa-save"></i> حفظ الإعدادات</button>
-    <button class="btn purple" style="width:100%;justify-content:center;padding:12px;" onclick="openChangeAdminPin()"><i class="fas fa-key"></i> تغيير رمز الإدارة</button>
-    <button class="btn-red" style="width:100%;justify-content:center;padding:12px;" onclick="closeM('m-loyalty-settings')">إغلاق</button>
-  </div>
-</div></div>
+<!-- SETTINGS TAB (moved from modal to tab page) -->
 
 <!-- RESET HESBA MODAL -->
 <div id="m-reset-hesba" class="overlay"><div class="modal">
@@ -1216,17 +1149,17 @@ body.light .adm-more-btn{background:#f8fafc;}
   <!-- ADMIN -->
   <div id="v-admin" style="display:none;">
     <div id="adm-main" style="padding-bottom:72px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px 0;">
-        <div style="display:flex;flex-direction:column;gap:1px;">
-          <div style="font-size:12px;color:var(--txm);">لوحة الإدارة</div>
-          <div id="ver-label-admin" style="font-size:10px;color:var(--g);font-weight:700;opacity:.8;"></div>
+      <div style="margin:10px 14px 0;background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:17px;font-weight:900;letter-spacing:.5px;">Alcamp <span style="color:var(--g);">الإدارة</span></div>
+          <div id="ver-label-admin" style="font-size:10px;color:var(--g);font-weight:700;margin-top:2px;opacity:.85;"></div>
         </div>
         <div style="display:flex;gap:6px;align-items:center;">
-          <button onclick="adminRefresh()" style="display:flex;align-items:center;gap:5px;background:var(--bg2);border:1.5px solid var(--bdr);border-radius:9px;padding:6px 12px;color:var(--neon);font-size:12px;font-family:Cairo,sans-serif;cursor:pointer;"><i class="fas fa-sync-alt" id="refresh-ico"></i> تحديث</button>
-          <button onclick="openM('m-logout')" style="display:flex;align-items:center;gap:5px;background:var(--redbg);border:1.5px solid rgba(239,68,68,.3);border-radius:9px;padding:6px 12px;color:var(--red);font-size:12px;font-family:Cairo,sans-serif;cursor:pointer;"><i class="fas fa-sign-out-alt"></i> خروج</button>
+          <button onclick="adminRefresh()" style="display:flex;align-items:center;gap:5px;background:var(--bg3);border:1.5px solid var(--bdr);border-radius:9px;padding:7px 13px;color:var(--neon);font-size:12px;font-family:Cairo,sans-serif;cursor:pointer;font-weight:700;"><i class="fas fa-sync-alt" id="refresh-ico"></i> تحديث</button>
+          <button onclick="openM('m-logout')" style="display:flex;align-items:center;gap:5px;background:var(--redbg);border:1.5px solid rgba(239,68,68,.3);border-radius:9px;padding:7px 13px;color:var(--red);font-size:12px;font-family:Cairo,sans-serif;cursor:pointer;font-weight:700;"><i class="fas fa-sign-out-alt"></i> خروج</button>
         </div>
       </div>
-      <div id="adm-stats" class="stats" style="margin-top:6px;"></div>
+      <div id="adm-stats" class="stats" style="margin-top:10px;"></div>
       <!-- Fields -->
       <div id="at-fields">
         <div style="padding:0 14px;margin-bottom:12px;">
@@ -1304,10 +1237,6 @@ body.light .adm-more-btn{background:#f8fafc;}
         <div id="coupons-list"></div>
       </div>
       <div id="at-hesba" style="display:none;padding:0 14px;">
-        <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="btn amber" style="flex:1;font-size:13px;padding:9px;" onclick="openLoyaltySettings()"><i class="fas fa-sliders-h"></i> إعدادات النظام</button>
-          <button class="btn purple" style="width:100%;font-size:13px;padding:9px;margin-top:4px;" onclick="openChangeAdminPin()"><i class="fas fa-key"></i> تغيير رمز الإدارة</button>
-        </div>
         <div id="hesba-content"></div>
       </div>
       <div id="at-stats" style="display:none;padding:0 14px;">
@@ -1341,6 +1270,79 @@ body.light .adm-more-btn{background:#f8fafc;}
           </div>
         </div>
         <div class="card" style="margin:0 14px;padding:0;overflow:hidden;"><div id="log-list"></div></div>
+      </div>
+      <div id="at-settings" style="display:none;padding:0 14px 32px;">
+        <div class="stitle" style="margin:8px 0;color:var(--amber);"><i class="fas fa-sliders-h"></i> إعدادات النظام</div>
+        <div class="aig">
+          <label style="font-size:12px;color:var(--txm);margin-bottom:4px;display:block;">نقاط لكل حجز</label>
+          <input type="number" id="ls-ppb" placeholder="نقاط لكل حجز (افتراضي: 10)">
+          <label style="font-size:12px;color:var(--txm);margin-bottom:4px;display:block;">معدل الاستبدال (نقاط = 1 دينار)</label>
+          <input type="number" id="ls-rate" placeholder="نقطة = 1 د.ل (افتراضي: 100)">
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bdr);">
+          <span style="font-weight:700;font-size:14px;">تفعيل نظام الولاء</span>
+          <div class="toggle-sw" id="loyalty-master-toggle" onclick="toggleLoyaltyMaster()"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bdr);">
+          <div>
+            <div style="font-weight:700;font-size:14px;">إظهار تبويب الولاء للاعبين</div>
+            <div style="font-size:11px;color:var(--txm);">إخفاء قسم الولاء من واجهة اللاعب</div>
+          </div>
+          <div class="toggle-sw" id="loyalty-visible-toggle" onclick="toggleLoyaltyVisible()"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bdr);">
+          <div>
+            <div style="font-weight:700;font-size:14px;">إظهار نظام الدوري والترتيب</div>
+            <div style="font-size:11px;color:var(--txm);">إخفاء الدوريات والترتيب من الفريق</div>
+          </div>
+          <div class="toggle-sw" id="league-visible-toggle" onclick="toggleLeagueVisible()"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--bdr);">
+          <div>
+            <div style="font-weight:700;font-size:14px;">إلزامية حقول منشورات الفريق</div>
+            <div style="font-size:11px;color:var(--txm);">إذا مفعّل، اللاعب لازم يملأ كل الحقول قبل النشر</div>
+          </div>
+          <div class="toggle-sw" id="post-require-toggle" onclick="togglePostRequire()"></div>
+        </div>
+        <div style="padding:10px 0;border-top:1px solid var(--bdr);">
+          <div style="font-weight:700;font-size:14px;margin-bottom:8px;">⚡ سرعة تحديث البيانات</div>
+          <div style="font-size:11px;color:var(--txm);margin-bottom:8px;">كل كم ثانية يتحقق التطبيق من وجود تغييرات جديدة</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="pos-btn" id="poll-btn-5"  data-sec="5"  onclick="setPollInterval(5)">5 ث  (سريع)</button>
+            <button class="pos-btn" id="poll-btn-10" data-sec="10" onclick="setPollInterval(10)">10 ث</button>
+            <button class="pos-btn on" id="poll-btn-15" data-sec="15" onclick="setPollInterval(15)">15 ث (افتراضي)</button>
+            <button class="pos-btn" id="poll-btn-30" data-sec="30" onclick="setPollInterval(30)">30 ث</button>
+            <button class="pos-btn" id="poll-btn-60" data-sec="60" onclick="setPollInterval(60)">60 ث (موفّر)</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:8px;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:6px;">🔔 إشعارات تيليغرام</div>
+          <div style="font-size:11px;color:var(--txm);margin-bottom:10px;">تصلك رسالة فورية على تيليغرام عند كل حجز جديد — حتى لو التطبيق مغلق</div>
+          <input type="text" id="tg-chat-id-inp" class="inp" placeholder="Chat ID" style="margin-bottom:6px;" autocomplete="off">
+          <div id="tg-status" style="font-size:12px;margin-top:2px;margin-bottom:6px;"></div>
+          <button class="btn" style="background:var(--blue);" onclick="saveAndTestTg()"><i class="fab fa-telegram"></i> حفظ واختبار الاتصال</button>
+        </div>
+        <div class="card" style="margin-top:8px;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:6px;">📱 إشعارات التطبيق (OneSignal)</div>
+          <div style="font-size:11px;color:var(--txm);margin-bottom:10px;">أرسل إشعار فوري لجميع مستخدمي التطبيق — احصل على REST API Key من OneSignal Dashboard ← Settings ← Keys &amp; IDs</div>
+          <input type="password" id="os-api-key-inp" class="inp" placeholder="REST API Key" style="margin-bottom:6px;" autocomplete="off">
+          <div id="os-status" style="font-size:12px;margin-top:2px;margin-bottom:8px;"></div>
+          <button class="btn" style="background:var(--purple);margin-bottom:6px;width:100%;" onclick="saveAndTestOsNotif()"><i class="fas fa-key"></i> حفظ المفتاح</button>
+          <button class="btn" style="background:var(--neon);color:#000;width:100%;" onclick="sendTestPushNotif()"><i class="fas fa-bell"></i> إرسال إشعار تجريبي للجميع</button>
+        </div>
+        <div class="card" style="margin-top:8px;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px;">✏️ قوالب رسائل التأكيد</div>
+          <div style="font-size:11px;color:var(--txm);margin-bottom:10px;">المتغيرات المتاحة: <span style="color:var(--neon);">{اسم} {ملعب} {تاريخ} {وقت} {نوع} {مبلغ} {سبب}</span></div>
+          <label style="font-size:12px;color:var(--txm);display:block;margin-bottom:4px;">✅ رسالة القبول</label>
+          <textarea id="msg-approve-tpl" class="inp" rows="3" style="resize:vertical;font-size:13px;line-height:1.6;" placeholder="✅ تم قبول حجزك في {ملعب}&#10;📅 {تاريخ} — {وقت}&#10;🏷 {نوع}&#10;💰 المبلغ: {مبلغ} د.ل"></textarea>
+          <label style="font-size:12px;color:var(--txm);display:block;margin-top:8px;margin-bottom:4px;">❌ رسالة الرفض</label>
+          <textarea id="msg-reject-tpl" class="inp" rows="3" style="resize:vertical;font-size:13px;line-height:1.6;" placeholder="❌ تم رفض حجزك في {ملعب}&#10;📅 {تاريخ} — {وقت}&#10;📝 السبب: {سبب}"></textarea>
+          <button class="btn" style="background:var(--g);width:100%;margin-top:8px;" onclick="saveMsgTemplates()"><i class="fas fa-save"></i> حفظ القوالب</button>
+        </div>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">
+          <button class="btn amber" style="width:100%;justify-content:center;padding:12px;" onclick="saveLoyaltySettings()"><i class="fas fa-save"></i> حفظ الإعدادات</button>
+          <button class="btn purple" style="width:100%;justify-content:center;padding:12px;" onclick="openChangeAdminPin()"><i class="fas fa-key"></i> تغيير رمز الإدارة</button>
+        </div>
       </div>
     </div>
     <div id="adm-sched" style="display:none;">
@@ -1376,32 +1378,32 @@ body.light .adm-more-btn{background:#f8fafc;}
         <div class="adm-more-handle"></div>
         <div class="adm-more-grid">
           <button class="adm-more-btn" id="adm-more-btn-users" onclick="adminTabMore('users')">
-            <i class="fas fa-users"></i><span>اللاعبين</span>
+            <i class="fas fa-users" style="color:var(--g);"></i><span>اللاعبين</span>
           </button>
           <button class="adm-more-btn" id="adm-more-btn-coupons" onclick="adminTabMore('coupons')">
-            <i class="fas fa-ticket-alt"></i><span>الكوبونات</span>
+            <i class="fas fa-ticket-alt" style="color:var(--purple);"></i><span>الكوبونات</span>
           </button>
           <button class="adm-more-btn" id="adm-more-btn-suggest" onclick="adminTabMore('suggest')" style="position:relative;">
-            <i class="fas fa-lightbulb"></i><span>الاقتراحات</span>
+            <i class="fas fa-lightbulb" style="color:var(--amber);"></i><span>الاقتراحات</span>
             <span id="adm-sugg-dot2" class="adm-nav-badge" style="display:none;position:absolute;top:6px;right:6px;"></span>
           </button>
           <button class="adm-more-btn" id="adm-more-btn-squad" onclick="adminTabMore('squad')">
-            <i class="fas fa-handshake"></i><span>المنشورات</span>
+            <i class="fas fa-handshake" style="color:var(--teal);"></i><span>المنشورات</span>
           </button>
           <button class="adm-more-btn" id="adm-more-btn-allsched" onclick="adminTabMore('allsched')">
-            <i class="fas fa-calendar-alt"></i><span>الجدول</span>
+            <i class="fas fa-calendar-alt" style="color:var(--blue);"></i><span>الجدول</span>
           </button>
           <button class="adm-more-btn" id="adm-more-btn-log" onclick="adminTabMore('log')">
-            <i class="fas fa-list-alt"></i><span>السجل</span>
+            <i class="fas fa-list-alt" style="color:var(--g);"></i><span>السجل</span>
           </button>
-          <button class="adm-more-btn" onclick="openM('m-loyalty-settings');closeAdmMore()">
-            <i class="fas fa-cog"></i><span>الإعدادات</span>
+          <button class="adm-more-btn" id="adm-more-btn-settings" onclick="adminTabMore('settings')">
+            <i class="fas fa-cog" style="color:var(--purple);"></i><span>الإعدادات</span>
           </button>
           <button class="adm-more-btn" onclick="openChangeAdminPin();closeAdmMore()">
-            <i class="fas fa-key"></i><span>تغيير الرمز</span>
+            <i class="fas fa-key" style="color:var(--amber);"></i><span>تغيير الرمز</span>
           </button>
           <button class="adm-more-btn" onclick="openM('m-broadcast');closeAdmMore()">
-            <i class="fas fa-bullhorn"></i><span>إشعار للجميع</span>
+            <i class="fas fa-bullhorn" style="color:var(--red);"></i><span>إشعار للجميع</span>
           </button>
         </div>
       </div>
@@ -1465,7 +1467,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v151';
+const APP_VER='v153';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -3767,7 +3769,7 @@ function removeVendorPhoto(idx){
 // ════════════════════════════════════════════════
 //  ADMIN
 // ════════════════════════════════════════════════
-const ADM_MAIN_TABS=['fields','users','pending','coupons','hesba','stats','suggest','squad','allsched','log'];
+const ADM_MAIN_TABS=['fields','users','pending','coupons','hesba','stats','suggest','squad','allsched','log','settings'];
 const ADM_NAV_MAP={fields:'adm-nav-fields',pending:'adm-nav-pending',hesba:'adm-nav-hesba',stats:'adm-nav-stats'};
 let _admActiveTab='fields';
 function adminTab(t){
@@ -3791,6 +3793,7 @@ function adminTab(t){
   if(t==='suggest')renderSuggestions();
   if(t==='squad')renderAdminSquad();
   if(t==='log')renderLog();
+  if(t==='settings')renderSettingsTab();
 }
 function toggleAdmMore(){
   const o=document.getElementById('adm-more-overlay');
@@ -3807,11 +3810,11 @@ function adminTabMore(t){adminTab(t);closeAdmMore();}
 function renderAdminStats(){
   const groupCount=new Set(F.filter(f=>f.groupId).map(f=>f.groupId)).size;
   document.getElementById('adm-stats').innerHTML=`
-  <div class="scard"><div class="n">${F.length}</div><div class="l">ملاعب</div></div>
-  <div class="scard"><div class="n" style="color:var(--purple);">${groupCount}</div><div class="l">أكاديميات</div></div>
-  <div class="scard"><div class="n">${U.filter(u=>u.role==='player').length}</div><div class="l">لاعبين</div></div>
-  <div class="scard"><div class="n">${B.length}</div><div class="l">حجوزات</div></div>
-  <div class="scard"><div class="n" style="color:var(--yellow);">${B.filter(b=>b.status==='Pending').length}</div><div class="l">انتظار</div></div>`;
+  <div class="scard brd-g"><div class="n" style="color:var(--neon);">${F.length}</div><div class="l">ملاعب</div></div>
+  <div class="scard brd-p"><div class="n" style="color:var(--purple);">${groupCount}</div><div class="l">أكاديميات</div></div>
+  <div class="scard brd-g"><div class="n" style="color:var(--neon);">${U.filter(u=>u.role==='player').length}</div><div class="l">لاعبين</div></div>
+  <div class="scard brd-p"><div class="n" style="color:var(--purple);">${B.length}</div><div class="l">حجوزات</div></div>
+  <div class="scard brd-a"><div class="n" style="color:var(--amber);">${B.filter(b=>b.status==='Pending').length}</div><div class="l">انتظار</div></div>`;
 }
 
 // Admin Stats Tab (بياني شامل)
@@ -4876,7 +4879,7 @@ function adminAddFakeReview(fid){
 // ══════════════════════════════════════════════
 //  LOYALTY ADMIN CONTROL (نقاط الولاء - تحكم الأدمن)
 // ══════════════════════════════════════════════
-function openLoyaltySettings(){
+function renderSettingsTab(){
   document.getElementById('ls-ppb').value = SETTINGS.pointsPerBooking||10;
   document.getElementById('ls-rate').value = SETTINGS.pointsRedeemRate||100;
   const tog = document.getElementById('loyalty-master-toggle');
@@ -4901,7 +4904,9 @@ function openLoyaltySettings(){
   if(appTpl)appTpl.value=SETTINGS.approveMsg||'';
   const rejTpl=document.getElementById('msg-reject-tpl');
   if(rejTpl)rejTpl.value=SETTINGS.rejectMsg||'';
-  openM('m-loyalty-settings');
+}
+function openLoyaltySettings(){
+  adminTab('settings');
 }
 function toggleLoyaltyMaster(){
   SETTINGS.loyaltyEnabled = SETTINGS.loyaltyEnabled===false ? true : false;
@@ -4945,7 +4950,7 @@ function saveLoyaltySettings(){
   if(ppb<1||rate<1){toast('قيم غير صحيحة','e');return;}
   SETTINGS.pointsPerBooking = ppb;
   SETTINGS.pointsRedeemRate = rate;
-  save(); closeM('m-loyalty-settings');
+  save();
   toast('تم حفظ إعدادات الولاء ✅','s');
   addLog('تعديل إعدادات نقاط الولاء');
   const loyaltyTabEl=document.getElementById('tp-loyalty');
