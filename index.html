@@ -54,6 +54,41 @@ body.light{background-image:none;}
 #toast.s{border-color:var(--neon);color:var(--neon);}
 #toast.e{border-color:var(--red);color:var(--red);}
 #toast.i{border-color:var(--amber);color:var(--amber);}
+/* ── Offline Banner ── */
+#offline-bar{
+  position:fixed;top:0;left:0;right:0;z-index:10000;
+  transform:translateY(-110%);transition:transform .4s cubic-bezier(.34,1.2,.64,1);
+  pointer-events:none;
+}
+#offline-bar.show{transform:translateY(0);pointer-events:auto;}
+#offline-bar .obar-inner{
+  margin:10px 14px;border-radius:14px;padding:12px 16px;
+  display:flex;align-items:center;gap:12px;
+  background:rgba(15,10,30,.94);
+  border:1.5px solid rgba(239,68,68,.5);
+  box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(239,68,68,.15);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+#offline-bar.reconnecting .obar-inner{
+  border-color:rgba(245,158,11,.5);
+  box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(245,158,11,.15);
+}
+#offline-bar.back-online .obar-inner{
+  border-color:rgba(74,222,128,.5);
+  box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(74,222,128,.15);
+}
+.obar-icon{font-size:22px;flex-shrink:0;line-height:1;}
+.obar-text{flex:1;}
+.obar-text b{display:block;font-size:13px;font-weight:900;color:#fff;margin-bottom:2px;}
+.obar-text span{font-size:11px;color:rgba(255,255,255,.6);}
+.obar-pulse{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;
+  animation:obarPulse 1.2s ease-in-out infinite;}
+@keyframes obarPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.6);}}
+#offline-bar.reconnecting .obar-pulse{background:var(--amber);animation:obarPulse .8s ease-in-out infinite;}
+#offline-bar.back-online .obar-pulse{background:var(--neon);animation:none;}
+body.light #offline-bar .obar-inner{background:rgba(255,255,255,.97);}
+body.light .obar-text b{color:#0f172a;}
+body.light .obar-text span{color:#64748b;}
 .hdr{padding:8px 16px 7px;background:linear-gradient(180deg,rgba(22,163,74,.08),transparent);
   border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:200;backdrop-filter:blur(16px);}
 .hdr-row{display:flex;justify-content:space-between;align-items:center;gap:8px;}
@@ -421,6 +456,16 @@ body.light .btn-xs[style*="background:var(--purple)"]{color:#fff!important;}
 </head>
 <body>
 <div id="toast"></div>
+<div id="offline-bar">
+  <div class="obar-inner">
+    <div class="obar-icon" id="obar-icon">📵</div>
+    <div class="obar-text">
+      <b id="obar-title">انقطع الاتصال بالإنترنت</b>
+      <span id="obar-sub">يرجى التحقق من الشبكة أو الواي فاي</span>
+    </div>
+    <div class="obar-pulse" id="obar-pulse"></div>
+  </div>
+</div>
 <div class="app">
 
 <!-- LOADING -->
@@ -458,7 +503,7 @@ body.light .btn-xs[style*="background:var(--purple)"]{color:#fff!important;}
       </div>
       <button class="btn" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> دخول</button>
       <p style="text-align:center;margin-top:10px;"><button onclick="openForgotPin()" style="background:none;border:none;color:var(--blue);font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;text-decoration:underline;">🔑 نسيت كلمة المرور؟</button></p>
-      <p style="text-align:center;margin-top:14px;font-size:11px;color:var(--txm);">للتواصل: <a href="https://wa.me/218912904941" target="_blank" style="font-weight:700;color:#25D366;text-decoration:none;"><i class="fab fa-whatsapp"></i> 0912904941</a></p>
+      <p style="text-align:center;margin-top:14px;font-size:11px;color:var(--txm);">للتواصل: <a onclick="openWaSupport()" style="font-weight:700;color:#25D366;text-decoration:none;cursor:pointer;"><i class="fab fa-whatsapp"></i> 0912904941</a></p>
       <p style="text-align:center;margin-top:8px;font-size:10px;color:var(--txm);opacity:0.5;" id="ver-label"></p>
     </div>
     <div id="f-signup" class="auth-form-panel fp-exit-left">
@@ -1004,7 +1049,7 @@ body.light .btn-xs[style*="background:var(--purple)"]{color:#fff!important;}
       <div id="bk-promo-banner" style="display:none;margin:10px 14px 0;background:linear-gradient(135deg,rgba(22,163,74,.14),rgba(22,163,74,.04));border:1.5px solid rgba(22,163,74,.4);border-radius:12px;padding:12px 14px;">
         <div style="font-size:13px;font-weight:800;color:var(--neon);margin-bottom:6px;">🎉 أنجزت 25 حجزاً!</div>
         <div style="font-size:12px;color:var(--txm);line-height:1.7;margin-bottom:10px;">يمكنك التواصل معنا ليتم قبول حجوزاتك فوراً بدون تأخير</div>
-        <a href="https://wa.me/218912904941" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fab fa-whatsapp"></i> تواصل الآن</a>
+        <a onclick="openWaSupport()" style="display:inline-flex;align-items:center;gap:6px;background:#25D366;color:#fff;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;"><i class="fab fa-whatsapp"></i> تواصل الآن</a>
       </div>
       <!-- المفضلة -->
       <div id="home-fav-section" style="display:none;padding:10px 14px 0;">
@@ -1504,7 +1549,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v157';
+const APP_VER='v160';
 const SUPA_URL = 'https://waqkjsdpbgxiraoigusn.supabase.co';
 const SUPA_KEY = 'sb_publishable_WUrDsBi15bxkj8o_tQjYJQ_As76dVQR';
 const TG_BOT_TOKEN = '8831160790:AAGM_x9siDzLMnwFcmmqQ9CRVHxWvrbgUhA';
@@ -1904,13 +1949,12 @@ function fmtH(h){if(h===0||h===24)return'12:00 ص';const ap=h>=12?'م':'ص',hr=h
 function fieldHours(f,sd){const pch=f.permanentClosedHours||[];const r=[];const isToday=sd&&sd===localDateStr(new Date());const nowH=isToday?new Date().getHours():-1;for(let i=+f.startHour;i<+f.endHour;i++){if(!pch.includes(i)&&i>nowH)r.push(fmtH(i));}return r;}
 function fillHours(sid){const s=document.getElementById(sid);if(!s)return;s.innerHTML='<option value="">اختر</option>';for(let i=0;i<=24;i++){let l=fmtH(i);if(i===0)l='12:00 ص (بداية)';if(i===24)l='12:00 ص (منتصف الليل)';s.innerHTML+=`<option value="${i}">${l}</option>`;}}
 function openWaSupport(){
-  const waUrl='https://wa.me/218912904941';
-  if(/Android/i.test(navigator.userAgent)){
-    window.location.href='intent://send?phone=218912904941#Intent;scheme=whatsapp;package=com.whatsapp;end;';
-    setTimeout(()=>{window.open(waUrl,'_blank');},800);
-  }else{
-    window.open(waUrl,'_blank')||(window.location.href=waUrl);
-  }
+  window.location.href='whatsapp://send?phone=218912904941';
+}
+function openWa(phone,msg){
+  const p=phone.replace(/\D/g,'');
+  const url=msg?`whatsapp://send?phone=${p}&text=${encodeURIComponent(msg)}`:`whatsapp://send?phone=${p}`;
+  window.location.href=url;
 }
 function openM(id){
   const e=document.getElementById(id);
@@ -2284,7 +2328,8 @@ function checkNotifications(){
   if(notes.length){
     notes.forEach(b=>{
       const f=F.find(x=>x.id===b.fieldId);
-      const msg=(b.status==='Approved'?'✅ تم قبول حجزك في ':'❌ تم رفض حجزك في ')+(f?f.name:'الملعب');
+      const _fn=(f&&(f.groupName||f.academy))||f?.name||'الملعب';
+      const msg=(b.status==='Approved'?'✅ تم قبول حجزك في ':'❌ تم رفض حجزك في ')+_fn;
       pushNotif(CU.phone,msg,b.status==='Approved'?'✅':'❌');
       toast(msg, b.status==='Approved'?'s':'e');
       b._notified=true;
@@ -2390,7 +2435,7 @@ function venueCardHtml(f){
     </div>
     ${f.phone?`<div style="display:flex;gap:6px;margin-top:8px;pointer-events:auto;" onclick="event.stopPropagation();">
       <a href="tel:${f.phone}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.25);border-radius:9px;padding:7px;font-size:12px;font-weight:700;text-decoration:none;"><i class="fas fa-phone"></i> اتصال</a>
-      <a href="https://wa.me/218${String(f.waPhone||f.phone).replace(/^0+/,'')}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(74,222,128,.1);color:var(--neon);border:1px solid rgba(74,222,128,.2);border-radius:9px;padding:7px;font-size:12px;font-weight:700;text-decoration:none;"><i class="fab fa-whatsapp"></i> واتساب</a>
+      <a onclick="openWa('218${String(f.waPhone||f.phone).replace(/^0+/,'')}','')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(74,222,128,.1);color:var(--neon);border:1px solid rgba(74,222,128,.2);border-radius:9px;padding:7px;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;"><i class="fab fa-whatsapp"></i> واتساب</a>
     </div>`:''}
   </div>
   ${f.photos&&f.photos.length?`<img src="${f.photos[0]}" style="width:100%;height:70px;object-fit:cover;border-radius:0 0 10px 10px;margin-top:8px;display:block;" onerror="this.style.display='none'" alt="">`:'' }`;
@@ -3164,7 +3209,7 @@ function renderPostCard(p,isAvail){
   const contactBtns=!isOwn?`
     <div style="display:flex;gap:6px;margin-top:8px;">
       <a href="tel:${p.phone}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:rgba(74,222,128,.12);border:1.5px solid rgba(74,222,128,.3);border-radius:9px;padding:8px;color:var(--neon);font-size:12px;font-weight:700;text-decoration:none;"><i class="fas fa-phone"></i> اتصال</a>
-      <a href="https://wa.me/${waNum}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:rgba(37,211,102,.12);border:1.5px solid rgba(37,211,102,.3);border-radius:9px;padding:8px;color:#25D366;font-size:12px;font-weight:700;text-decoration:none;"><i class="fab fa-whatsapp"></i> واتساب</a>
+      <a onclick="openWa('${waNum}','')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;background:rgba(37,211,102,.12);border:1.5px solid rgba(37,211,102,.3);border-radius:9px;padding:8px;color:#25D366;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;"><i class="fab fa-whatsapp"></i> واتساب</a>
     </div>`:'';
   let badges='';
   if(!isAvail){
@@ -3548,10 +3593,11 @@ function setBkStatus(id,st){
     const bkTypeLabel=b.bookingType==='monthly'?'حجز شهري':'حجز عادي';
     const bkDateInfo=b.bookingType==='monthly'?`شهري — ${b.time}`:`${b.date} — ${b.time}`;
     const customTpl=SETTINGS.approveMsg;
+    const _vf=F.find(x=>x.id===b.fieldId);const _vname=(_vf&&(_vf.groupName||_vf.academy))||fn||'الملعب';
     const msg=buildBkMsg(customTpl,b,fn,'')||`✅ تم قبول حجزك في ${fn}\n📅 ${bkDateInfo}\n🏷 ${bkTypeLabel}${b.price?`\n💰 المبلغ: ${b.price} د.ل`:''}`;
     pushNotif(b.clientPhone,msg,'✅');
-    sendOsPush('phone',b.clientPhone,'✅ تم قبول حجزك',msg.replace(/\n/g,' '));
-    if(!b._pointsAwarded&&SETTINGS.loyaltyEnabled!==false){const u=U.find(x=>x.phone===b.clientPhone);if(u){u.points=(u.points||0)+(SETTINGS.pointsPerBooking||10);b._pointsAwarded=true;pushNotif(b.clientPhone,`🏅 حصلت على ${SETTINGS.pointsPerBooking} نقاط من حجزك في ${fn}`,'🏅');}}
+    sendOsPush('phone',b.clientPhone,`✅ تم قبول حجزك في ${_vname}`,msg.replace(/\n/g,' '));
+    if(!b._pointsAwarded&&SETTINGS.loyaltyEnabled!==false){const u=U.find(x=>x.phone===b.clientPhone);if(u){u.points=(u.points||0)+(SETTINGS.pointsPerBooking||10);b._pointsAwarded=true;pushNotif(b.clientPhone,`🏅 حصلت على ${SETTINGS.pointsPerBooking} نقاط من حجزك في ${_vname}`,'🏅');}}
     save();await saveToSupabase();
     renderVendorBk();updateVendorReqBadge();toast('تم قبول الحجز ✅','s');addLog(`قبول حجز: ${b.clientName}`);
   })();
@@ -4567,7 +4613,7 @@ function renderAdminSquad(){
       <div style="font-size:11px;color:var(--txm);margin-bottom:8px;">📱 <span dir="ltr">${p.phone}</span>${p.age?` | العمر: ${p.age} سنة`:''} | منضمون: ${p.joiners?.length||0}</div>
       <div style="display:flex;gap:6px;">
         <a href="tel:${p.phone}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(74,222,128,.12);border:1.5px solid rgba(74,222,128,.3);border-radius:9px;padding:7px;color:var(--neon);font-size:12px;font-weight:700;text-decoration:none;"><i class="fas fa-phone"></i> اتصال</a>
-        <a href="https://wa.me/${waNum}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(37,211,102,.12);border:1.5px solid rgba(37,211,102,.3);border-radius:9px;padding:7px;color:#25D366;font-size:12px;font-weight:700;text-decoration:none;"><i class="fab fa-whatsapp"></i> واتساب</a>
+        <a onclick="openWa('${waNum}','')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(37,211,102,.12);border:1.5px solid rgba(37,211,102,.3);border-radius:9px;padding:7px;color:#25D366;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;"><i class="fab fa-whatsapp"></i> واتساب</a>
         <button class="btn-xs" style="background:var(--red);" onclick="adminDelPost(${p.id})"><i class="fas fa-trash"></i></button>
       </div>
     </div>`;
@@ -4599,11 +4645,11 @@ function renderAdminPending(){
       <div style="background:var(--bg2);border-radius:8px;padding:8px 10px;margin-bottom:7px;">${_priceRow}</div>
       ${cPhone?`<div style="display:flex;gap:6px;margin-bottom:7px;">
         <a href="tel:${cPhone}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.35);border-radius:8px;padding:7px;color:var(--blue);font-size:11px;font-weight:700;text-decoration:none;"><i class="fas fa-phone"></i> اتصال</a>
-        <a href="https://wa.me/${cWa}?text=${cWaMsg}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:8px;padding:7px;color:#25D366;font-size:11px;font-weight:700;text-decoration:none;"><i class="fab fa-whatsapp"></i> واتساب</a>
+        <a onclick="openWa('${cWa}','${cWaMsg.replace(/'/g,"\\'")}')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);border-radius:8px;padding:7px;color:#25D366;font-size:11px;font-weight:700;text-decoration:none;cursor:pointer;"><i class="fab fa-whatsapp"></i> واتساب</a>
       </div>`:''}
       ${vPhone?`<div style="display:flex;gap:6px;margin-bottom:7px;">
         <a href="tel:${vPhone}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:8px;padding:6px;color:var(--txm);font-size:10px;font-weight:700;text-decoration:none;"><i class="fas fa-phone" style="font-size:10px;"></i> صاحب الملعب</a>
-        <a href="https://wa.me/${vWa}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.15);border-radius:8px;padding:6px;color:var(--txm);font-size:10px;font-weight:700;text-decoration:none;"><i class="fab fa-whatsapp" style="font-size:10px;"></i> واتساب الملعب</a>
+        <a onclick="openWa('${vWa}','')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.15);border-radius:8px;padding:6px;color:var(--txm);font-size:10px;font-weight:700;text-decoration:none;cursor:pointer;"><i class="fab fa-whatsapp" style="font-size:10px;"></i> واتساب الملعب</a>
       </div>`:''}
       <div style="display:flex;gap:7px;"><button class="btn-xs" style="flex:1;background:var(--g);" onclick="adminSetBkStatus(${b.id},'Approved')"><i class="fas fa-check"></i> قبول</button><button class="btn-xs" style="flex:1;background:#2a4060;" onclick="adminSetBkStatus(${b.id},'Rejected')"><i class="fas fa-times"></i> رفض</button></div>
     </div>`;
@@ -4635,10 +4681,11 @@ function adminSetBkStatus(id,st){
     const bkTypeLabel=b.bookingType==='monthly'?'حجز شهري':'حجز عادي';
     const bkDateInfo=b.bookingType==='monthly'?`شهري — ${b.time}`:`${b.date} — ${b.time}`;
     const customTpl=SETTINGS.approveMsg;
+    const _af=F.find(x=>x.id===b.fieldId);const _aname=(_af&&(_af.groupName||_af.academy))||fn||'الملعب';
     const msg=buildBkMsg(customTpl,b,fn,'')||`✅ تم قبول حجزك في ${fn}\n📅 ${bkDateInfo}\n🏷 ${bkTypeLabel}${b.price?`\n💰 المبلغ: ${b.price} د.ل`:''}`;
     pushNotif(b.clientPhone,msg,'✅');
-    sendOsPush('phone',b.clientPhone,'✅ تم قبول حجزك',msg.replace(/\n/g,' '));
-    if(!b._pointsAwarded&&SETTINGS.loyaltyEnabled!==false){const u=U.find(x=>x.phone===b.clientPhone);if(u){u.points=(u.points||0)+(SETTINGS.pointsPerBooking||10);b._pointsAwarded=true;pushNotif(b.clientPhone,`🏅 حصلت على ${SETTINGS.pointsPerBooking} نقاط من حجزك في ${fn}`,'🏅');}}
+    sendOsPush('phone',b.clientPhone,`✅ تم قبول حجزك في ${_aname}`,msg.replace(/\n/g,' '));
+    if(!b._pointsAwarded&&SETTINGS.loyaltyEnabled!==false){const u=U.find(x=>x.phone===b.clientPhone);if(u){u.points=(u.points||0)+(SETTINGS.pointsPerBooking||10);b._pointsAwarded=true;pushNotif(b.clientPhone,`🏅 حصلت على ${SETTINGS.pointsPerBooking} نقاط من حجزك في ${_aname}`,'🏅');}}
     save();await saveToSupabase();
     renderAdminPending();updateAdminPendingBadge();renderAdminStats();
     toast('تم القبول ✅','s');addLog(`إدارة Approved: ${b.clientName}`);
@@ -4674,9 +4721,11 @@ function renderAdminHistory(){
     const badgeTxt=isApproved?'✅ مقبول':'❌ مرفوض';
     const _u=U.find(u=>u.phone===b.clientPhone);
     const _age=_u&&_u.dob?(new Date().getFullYear()-parseInt(_u.dob))+' سنة':'—';
+    const _acad=f&&(f.groupName||f.academy||'');
+    const _title=f?(_acad?`<span style="color:var(--neon);font-weight:900;">${_acad}</span> <span style="color:var(--txm);font-size:11px;font-weight:400;">· ${f.name}</span>`:f.name):'ملعب محذوف';
     c.innerHTML+=`<div class="bkcard" style="margin-bottom:8px;border-color:${badgeColor}30;">
       <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:4px;">
-        <strong style="font-size:13px;">${f?f.name:'ملعب محذوف'}</strong>
+        <div style="font-size:13px;font-weight:700;">${_title}</div>
         <span style="font-size:11px;font-weight:700;color:${badgeColor};background:${badgeBg};padding:3px 8px;border-radius:20px;">${badgeTxt}</span>
       </div>
       <div style="font-size:12px;color:var(--txm);">${b.clientName} | <span dir="ltr">${b.clientPhone}</span> | 🎂 ${_age}</div>
@@ -5355,6 +5404,92 @@ if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js').catch(()=>{});
   });
 }
+
+// ════════════════════════════════════════════════
+//  NETWORK CONNECTION LISTENER
+// ════════════════════════════════════════════════
+(function(){
+  let _netOffline=false;
+  let _netPingTimer=null;
+  let _netHideTimer=null;
+  const bar=document.getElementById('offline-bar');
+  const oIcon=document.getElementById('obar-icon');
+  const oTitle=document.getElementById('obar-title');
+  const oSub=document.getElementById('obar-sub');
+
+  function showOfflineBar(){
+    clearTimeout(_netHideTimer);
+    bar.classList.remove('reconnecting','back-online');
+    if(oIcon)oIcon.textContent='📵';
+    if(oTitle)oTitle.textContent='انقطع الاتصال بالإنترنت';
+    if(oSub)oSub.textContent='يرجى التحقق من الشبكة أو الواي فاي';
+    bar.classList.add('show');
+  }
+
+  function showReconnecting(){
+    bar.classList.remove('back-online');
+    bar.classList.add('reconnecting');
+    if(oIcon)oIcon.textContent='🔄';
+    if(oTitle)oTitle.textContent='جاري إعادة الاتصال...';
+    if(oSub)oSub.textContent='يتم تحميل البيانات، لحظة من فضلك';
+    bar.classList.add('show');
+  }
+
+  function showBackOnline(){
+    bar.classList.remove('reconnecting');
+    bar.classList.add('back-online');
+    if(oIcon)oIcon.textContent='✅';
+    if(oTitle)oTitle.textContent='عاد الاتصال بالإنترنت';
+    if(oSub)oSub.textContent='تم تحديث البيانات بنجاح';
+    clearTimeout(_netHideTimer);
+    _netHideTimer=setTimeout(()=>{bar.classList.remove('show');setTimeout(()=>bar.classList.remove('back-online'),500);},3000);
+  }
+
+  async function pingCheck(){
+    try{
+      const r=await fetch('https://www.gstatic.com/generate_204',{method:'HEAD',cache:'no-store',mode:'no-cors',signal:AbortSignal.timeout(5000)});
+      return true;
+    }catch(e){return false;}
+  }
+
+  async function handleOffline(){
+    if(_netOffline)return;
+    _netOffline=true;
+    showOfflineBar();
+    clearInterval(_netPingTimer);
+    _netPingTimer=setInterval(async()=>{
+      const ok=await pingCheck();
+      if(ok)handleOnline();
+    },8000);
+  }
+
+  async function handleOnline(){
+    if(!_netOffline)return;
+    _netOffline=false;
+    clearInterval(_netPingTimer);
+    showReconnecting();
+    try{
+      if(typeof loadFromSupabase==='function')await loadFromSupabase();
+      if(typeof refreshAllBadges==='function')refreshAllBadges();
+      if(CU&&CU.role==='admin'&&typeof renderAdminStats==='function')renderAdminStats();
+      if(CU&&CU.role==='vendor'&&typeof renderVendorBk==='function')renderVendorBk();
+    }catch(e){}
+    showBackOnline();
+  }
+
+  window.addEventListener('offline',()=>handleOffline());
+  window.addEventListener('online',async()=>{
+    const ok=await pingCheck();
+    if(ok)handleOnline();else handleOffline();
+  });
+
+  // initial check after app loads
+  setTimeout(async()=>{
+    if(!navigator.onLine){handleOffline();return;}
+    const ok=await pingCheck();
+    if(!ok)handleOffline();
+  },3000);
+})();
 </script>
 </body>
 </html>
