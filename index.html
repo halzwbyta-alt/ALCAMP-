@@ -192,6 +192,7 @@ body.light .obar-text span{color:#64748b;}
 .overlay.open{display:flex;pointer-events:all;visibility:visible;}
 .modal{background:var(--bg2);padding:22px;border-radius:20px 20px 0 0;width:100%;max-width:460px;border:1px solid var(--bdr);border-bottom:none;max-height:90vh;overflow-y:auto;animation:slideUp .28s cubic-bezier(.34,1.4,.64,1);}
 @keyframes slideUp{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+@keyframes popIn{from{opacity:0;transform:scale(.82);}to{opacity:1;transform:scale(1);}}
 .modal-title{font-size:16px;font-weight:700;margin-bottom:16px;}
 .modal-acts{display:flex;gap:8px;margin-top:16px;}
 .modal-acts>*{flex:1;}
@@ -513,6 +514,18 @@ body.light .adm-fields-wrap .card{color:#334155;}
       <p style="text-align:center;margin-top:8px;font-size:10px;color:var(--txm);opacity:0.5;" id="ver-label"></p>
     </div>
     <div id="f-signup" class="auth-form-panel fp-exit-left">
+      <div style="display:flex;justify-content:center;margin-bottom:14px;">
+        <div style="position:relative;cursor:pointer;" onclick="document.getElementById('s-avatar-inp').click()">
+          <div style="width:72px;height:72px;border-radius:50%;background:var(--bg3);border:2.5px solid var(--g);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-user" style="font-size:28px;color:var(--txm);" id="s-avatar-icon"></i>
+            <img id="s-avatar-img" style="width:100%;height:100%;object-fit:cover;display:none;" src="">
+          </div>
+          <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--g);border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+            <i class="fas fa-camera" style="font-size:10px;color:#000;"></i>
+          </div>
+        </div>
+      </div>
+      <input type="file" id="s-avatar-inp" accept="image/*" style="display:none;" onchange="handleSignupAvatar(this)">
       <input id="s-nm" type="text" class="inp" placeholder="الاسم الثنائي (مثال: محمد علي)">
       <input id="s-ph" type="tel" class="inp" placeholder="رقم هاتفك (09xxxxxxxx)">
       <div class="inp-eye-wrap">
@@ -569,6 +582,22 @@ body.light .adm-fields-wrap .card{color:#334155;}
     <button class="btn-red" style="width:100%;justify-content:center;padding:12px;" onclick="closeM('m-logout')">تراجع</button>
   </div>
 </div></div>
+
+<div id="m-del-post" class="overlay" style="align-items:center;">
+  <div class="modal" style="border-radius:20px;border:1px solid var(--bdr);max-width:320px;width:90%;animation:popIn .26s cubic-bezier(.34,1.5,.64,1);">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:58px;height:58px;background:var(--redbg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:1.5px solid rgba(239,68,68,.3);">
+        <i class="fas fa-trash-alt" style="font-size:22px;color:var(--red);"></i>
+      </div>
+      <p style="font-size:16px;font-weight:800;color:var(--tx);margin:0 0 8px;">حذف المنشور</p>
+      <p style="font-size:13px;color:var(--txm);margin:0;line-height:1.6;">هل أنت متأكد من حذف هذا المنشور؟<br>لا يمكن التراجع عن هذا الإجراء.</p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeM('m-del-post')" style="flex:1;padding:13px;border-radius:13px;border:1.5px solid var(--bdr2);background:var(--bg3);color:var(--txm);font-size:14px;font-weight:700;font-family:Cairo,sans-serif;cursor:pointer;">إلغاء</button>
+      <button onclick="confirmDelPost()" style="flex:1;padding:13px;border-radius:13px;border:none;background:var(--red);color:#fff;font-size:14px;font-weight:800;font-family:Cairo,sans-serif;cursor:pointer;"><i class="fas fa-trash-alt"></i> حذف</button>
+    </div>
+  </div>
+</div>
 
 <div id="m-bkconf" class="overlay"><div class="modal">
   <p class="modal-title" style="color:var(--neon);text-align:center;"><i class="fas fa-calendar-check"></i> تأكيد طلب الحجز</p>
@@ -1758,7 +1787,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v190';
+const APP_VER='v192';
 let _isOffline=false;
 function checkOnline(){
   if(_isOffline){
@@ -2337,7 +2366,7 @@ function authTab(t){
   document.getElementById('tts').classList.toggle('on',!isLogin);
   document.getElementById('tab-slide').style.transform=isLogin?'translateX(0)':'translateX(-100%)';
   const fl=document.getElementById('f-login'),fs=document.getElementById('f-signup');
-  if(isLogin){fl.className='auth-form-panel fp-active';fs.className='auth-form-panel fp-exit-left';}
+  if(isLogin){fl.className='auth-form-panel fp-active';fs.className='auth-form-panel fp-exit-left';_signupAvatarB64='';const img=document.getElementById('s-avatar-img'),icon=document.getElementById('s-avatar-icon');if(img&&icon){img.style.display='none';icon.style.display='';}}
   else{fs.className='auth-form-panel fp-active';fl.className='auth-form-panel fp-exit-right';}
 }
 function toggleEye(id,btn){const inp=document.getElementById(id),ic=btn.querySelector('i');if(inp.type==='password'){inp.type='text';ic.className='fas fa-eye';}else{inp.type='password';ic.className='fas fa-eye-slash';}}
@@ -2514,6 +2543,7 @@ async function verifyOtp(){
   const dob=document.getElementById('s-dob')?document.getElementById('s-dob').value||'':'';
   closeM('m-otp');
   const nu={phone:ph,name:nm,pin,role:'player',banned:false,favs:[],points:0,notifications:[],dob};
+  if(_signupAvatarB64){nu.avatar=_signupAvatarB64;_signupAvatarB64='';}
   U.push(nu);
   localStorage.setItem('db_users',JSON.stringify(U));
   await saveToSupabase();
@@ -3513,6 +3543,8 @@ function openPostModal(mode){
   document.querySelectorAll('#post-my-level-btns .pos-btn,#post-avail-pos-btns .pos-btn,#post-avail-count-btns .pos-btn').forEach(b=>b.classList.remove('on'));
   openM('m-post');
 }
+let _signupAvatarB64='';
+function handleSignupAvatar(inp){const file=inp.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){_signupAvatarB64=e.target.result;const img=document.getElementById('s-avatar-img'),icon=document.getElementById('s-avatar-icon');if(img&&icon){img.src=_signupAvatarB64;img.style.display='block';icon.style.display='none';}};reader.readAsDataURL(file);}
 let _postPhotoB64='';
 function handlePostPhoto(inp){const file=inp.files[0];if(!file)return;const reader=new FileReader();reader.onload=function(e){_postPhotoB64=e.target.result;const img=document.getElementById('post-photo-img');img.src=_postPhotoB64;document.getElementById('post-photo-preview').style.display='block';document.getElementById('post-photo-lbl').textContent='تم إضافة الصورة ✅';};reader.readAsDataURL(file);}
 function clearPostPhoto(){_postPhotoB64='';document.getElementById('post-photo-inp').value='';document.getElementById('post-photo-preview').style.display='none';document.getElementById('post-photo-lbl').textContent='إضافة صورة (اختياري)';}
@@ -3639,7 +3671,9 @@ function renderPostCard(p,isAvail){
       </div>
     </div></div>`;
 }
-function deletePost(id){if(!confirm('حذف هذا المنشور؟'))return;POSTS=POSTS.filter(p=>p.id!==id);save();renderSquad();}
+let _delPostId=null;
+function deletePost(id){_delPostId=id;openM('m-del-post');}
+function confirmDelPost(){if(_delPostId==null)return;POSTS=POSTS.filter(p=>p.id!==_delPostId);_delPostId=null;save();closeM('m-del-post');renderSquad();}
 // Leagues
 function addLeague(){
   const name=document.getElementById('lg-name').value.trim(),field=document.getElementById('lg-field').value.trim(),date=document.getElementById('lg-date').value.trim(),teams=+document.getElementById('lg-teams').value,note=document.getElementById('lg-note').value.trim();
