@@ -1444,6 +1444,7 @@ body.light .adm-fields-wrap .card{color:#334155;}
       <div class="stitle">حجوزات: <span id="v-fname" style="color:var(--amber);font-style:italic;"></span></div>
       <div id="v-field-filter" style="display:none;padding:0 14px 8px;"></div>
       <div class="srch-wrap"><input class="srch" type="text" id="vbk-q" placeholder="ابحث باسم أو رقم..." oninput="renderVendorBk()"></div>
+      <div id="v-status-filter" style="padding:0 14px 8px;"></div>
       <div id="v-bk-list" class="lc"></div>
     </div>
     <div id="vt-sched" style="display:none;padding:0 14px;">
@@ -1624,6 +1625,15 @@ body.light .adm-fields-wrap .card{color:#334155;}
           <div class="toggle-sw" id="post-require-toggle" onclick="togglePostRequire()"></div>
         </div>
         <div style="padding:10px 0;border-top:1px solid var(--bdr);">
+          <div style="font-weight:700;font-size:14px;margin-bottom:8px;">🔢 حدود الحجز الافتراضية للاعبين</div>
+          <div style="font-size:11px;color:var(--txm);margin-bottom:8px;">تُطبَّق على كل لاعب لم تُحدَّد له قيمة خاصة</div>
+          <div style="display:flex;gap:8px;margin-bottom:4px;">
+            <div style="flex:1;"><label style="font-size:11px;color:var(--txm);display:block;margin-bottom:3px;">حجوزات عادية (افتراضي: 2)</label><input type="number" id="max-bk-default" class="inp" style="margin-bottom:0;" min="0" placeholder="2"></div>
+            <div style="flex:1;"><label style="font-size:11px;color:var(--txm);display:block;margin-bottom:3px;">حجوزات شهرية (افتراضي: 1)</label><input type="number" id="max-mon-default" class="inp" style="margin-bottom:0;" min="0" placeholder="1"></div>
+          </div>
+          <button class="btn" style="margin-top:8px;padding:9px;" onclick="saveDefaultLimits()"><i class="fas fa-save"></i> حفظ الحدود</button>
+        </div>
+        <div style="padding:10px 0;border-top:1px solid var(--bdr);">
           <div style="font-weight:700;font-size:14px;margin-bottom:8px;">⚡ سرعة تحديث البيانات</div>
           <div style="font-size:11px;color:var(--txm);margin-bottom:8px;">كل كم ثانية يتحقق التطبيق من وجود تغييرات جديدة</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -1657,6 +1667,12 @@ body.light .adm-fields-wrap .card{color:#334155;}
           <label style="font-size:12px;color:var(--txm);display:block;margin-top:8px;margin-bottom:4px;">❌ رسالة الرفض</label>
           <textarea id="msg-reject-tpl" class="inp" rows="3" style="resize:vertical;font-size:13px;line-height:1.6;" placeholder="❌ تم رفض حجزك في {ملعب}&#10;📅 {تاريخ} — {وقت}&#10;📝 السبب: {سبب}"></textarea>
           <button class="btn" style="background:var(--g);width:100%;margin-top:8px;" onclick="saveMsgTemplates()"><i class="fas fa-save"></i> حفظ القوالب</button>
+        </div>
+        <div class="card" style="margin-top:8px;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px;">📞 رقم واتساب الإدارة</div>
+          <div style="font-size:11px;color:var(--txm);margin-bottom:8px;">يُستخدم في زر "تواصل" للحجوزات الشهرية المخفية</div>
+          <input type="tel" id="admin-phone-inp" class="inp" placeholder="0912000000" style="margin-bottom:8px;" autocomplete="off">
+          <button class="btn" style="background:var(--g);width:100%;" onclick="saveAdminPhone()"><i class="fas fa-save"></i> حفظ الرقم</button>
         </div>
         <div class="card" style="margin-top:8px;">
           <div style="font-weight:700;font-size:14px;margin-bottom:4px;">🌐 روابط التواصل الاجتماعي</div>
@@ -1793,6 +1809,8 @@ if(SETTINGS.loyaltyVisible===undefined)SETTINGS.loyaltyVisible=true;
 if(SETTINGS.leagueVisible===undefined)SETTINGS.leagueVisible=true;
 if(SETTINGS.postRequireAll===undefined)SETTINGS.postRequireAll=true;
 if(SETTINGS.monthlyEnabled===undefined)SETTINGS.monthlyEnabled=true;
+if(SETTINGS.maxBookingsDefault===undefined)SETTINGS.maxBookingsDefault=2;
+if(SETTINGS.maxMonthlyDefault===undefined)SETTINGS.maxMonthlyDefault=1;
 if(SETTINGS.pollInterval===undefined)SETTINGS.pollInterval=15;
 if(!SETTINGS.hesbaLog)SETTINGS.hesbaLog=[];
 if(!SETTINGS.socialLinks)SETTINGS.socialLinks={fb:'',wa:'',tt:'',ig:''};
@@ -1804,7 +1822,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v212';
+const APP_VER='v215';
 let _isOffline=false;
 function checkOnline(){
   if(_isOffline){
@@ -3858,7 +3876,7 @@ function vendorQuickAction(bid,fid,ds,cid){
   _qaCallback=(approve)=>{
     if(approve){
       b.status='Approved';b._notified=true;
-      if(!b._pointsAwarded&&SETTINGS.loyaltyEnabled!==false){const u=U.find(x=>x.phone===b.clientPhone);if(u){u.points=(u.points||0)+(+SETTINGS.pointsPerBooking||1);b._pointsAwarded=true;pushNotif(b.clientPhone,`🏅 حصلت على ${SETTINGS.pointsPerBooking} نقاط من حجزك في ${fn}`,'🏅');}}
+      if(!b._pointsAwarded&&SETTINGS.loyaltyEnabled!==false){const u=U.find(x=>x.phone===b.clientPhone);if(u){u.points=(u.points||0)+(+SETTINGS.pointsPerBooking||10);b._pointsAwarded=true;pushNotif(b.clientPhone,`🏅 حصلت على ${SETTINGS.pointsPerBooking||10} نقاط من حجزك في ${fn}`,'🏅');}}
       pushNotif(b.clientPhone,`✅ تم قبول حجزك في ${fn} (${b.date} ${b.time})`,'✅');
       sendTgNotif(`✅ <b>تم قبول حجز</b>\n👤 ${b.clientName}\n🏟 ${fn}\n📅 ${b.date} ${b.time}`);
       save();addLog(`قبول حجز من الجدول: ${b.clientName}`);
@@ -4014,6 +4032,8 @@ function vendorTab(t){
   if(t==='set')renderVendorSettings();
 }
 let vendorFieldFilter='all';
+let vendorStatusFilter='all';
+let vendorSortAsc=false;
 function renderVendorBk(){
   const c=document.getElementById('v-bk-list');
   const q=(document.getElementById('vbk-q')?.value||'').toLowerCase();
@@ -4029,9 +4049,26 @@ function renderVendorBk(){
       `</div>`;
     document.getElementById('v-fname').textContent=vfs.find(f=>String(f.id)===String(CU.fieldId))?.name||CU.fieldName;
   }else if(filterWrap){filterWrap.style.display='none';}
-  let bks=B.filter(b=>ids.includes(String(b.fieldId))).slice().reverse();
+  // Status filter + sort toggle pills
+  const sfWrap=document.getElementById('v-status-filter');
+  if(sfWrap){
+    const _sts=[{k:'all',l:'الكل'},{k:'Pending',l:'جديد'},{k:'Approved',l:'مقبول'},{k:'played',l:'⚽ تمّت'},{k:'Rejected',l:'ملغي'}];
+    sfWrap.innerHTML=`<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:11px;color:var(--txm);">الحالة:</span>`+
+      _sts.map(s=>`<button class="fbtn${vendorStatusFilter===s.k?' on':''}" onclick="setVendorStatusFilter('${s.k}')">${s.l}</button>`).join('')+
+      `<button class="fbtn" onclick="vendorSortAsc=!vendorSortAsc;renderVendorBk()" style="${vendorSortAsc?'background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.5);color:var(--blue);':''}"><i class="fas fa-sort-amount-${vendorSortAsc?'up':'down-alt'}"></i> ${vendorSortAsc?'الأقدم':'الأحدث'}</button>
+      </div>`;
+  }
+  function _parseTimeNum(t){const m=String(t||'').match(/(\d+):(\d+)\s*(ص|م|am|pm)?/i);if(!m)return 0;let h=+m[1],mn=+m[2];const p=(m[3]||'').trim();if(p==='م'||/pm/i.test(p)){if(h<12)h+=12;}else if((p==='ص'||/am/i.test(p))&&h===12)h=0;return h*60+mn;}
+  let bks=B.filter(b=>ids.includes(String(b.fieldId))).slice().sort((a,z)=>{const dc=a.date.localeCompare(z.date);if(dc!==0)return vendorSortAsc?dc:-dc;const tc=_parseTimeNum(a.time)-_parseTimeNum(z.time);return vendorSortAsc?tc:-tc;});
   if(vendorFieldFilter!=='all')bks=bks.filter(b=>String(b.fieldId)===vendorFieldFilter);
   if(q)bks=bks.filter(b=>b.clientName.toLowerCase().includes(q)||b.clientPhone.includes(q));
+  if(vendorStatusFilter!=='all'){
+    if(vendorStatusFilter==='played')bks=bks.filter(b=>isPlayed(b)&&b.status!=='Rejected');
+    else if(vendorStatusFilter==='Pending')bks=bks.filter(b=>b.status==='Pending'&&!isPlayed(b));
+    else if(vendorStatusFilter==='Approved')bks=bks.filter(b=>b.status==='Approved'&&!isPlayed(b));
+    else if(vendorStatusFilter==='Rejected')bks=bks.filter(b=>b.status==='Rejected');
+  }
   if(!bks.length){c.innerHTML='<div class="empty"><i class="fas fa-inbox"></i><p>لا توجد طلبات بعد</p></div>';return;}
   const lbl={Pending:'جديد',Approved:'مقبول',Rejected:'ملغي'};const cls={Pending:'pend',Approved:'ok',Rejected:'no'};
   // Group monthly pending bookings by (clientPhone + fieldId + time)
@@ -4046,6 +4083,7 @@ function renderVendorBk(){
   c.innerHTML='';
   // Render grouped monthly pending cards
   Object.entries(_mGroups).forEach(([gk,grp])=>{
+    if(vendorStatusFilter!=='all'&&vendorStatusFilter!=='Pending')return;
     const b0=grp[0];const bf=F.find(x=>x.id===b0.fieldId);
     const _vu=U.find(u=>u.phone===b0.clientPhone);
     const _vAge=_vu&&_vu.dob?(new Date().getFullYear()-parseInt(_vu.dob))+' سنة':'—';
@@ -4081,7 +4119,7 @@ function renderVendorBk(){
   // Render remaining (non-grouped) bookings
   bks.filter(b=>!_gIds.has(b.id)).forEach(b=>{
     const bf=F.find(x=>x.id===b.fieldId);
-    const played=isPlayed(b);
+    const played=isPlayed(b)&&b.status!=='Rejected';
     const vCardCls=played?'played':(cls[b.status]||'');
     const vBdgCls=played?'bdg-played':(b.status==='Pending'?'bdg-pend':b.status==='Approved'?'bdg-ok':'bdg-no');
     const vBdgTxt=played?'⚽ تمّت':lbl[b.status];
@@ -4176,8 +4214,10 @@ function setMonthlyGroupStatus(gk,status){
   }else{
     grpBks.forEach(b=>{b.status='Approved';b._notified=true;});
     const dates=sortedDates.map(x=>x.date).join(' | ');
-    const msg=`✅ تم قبول حجزك الشهري في ${fn}\n⏰ ${bTime}\n📅 ${dates}`;
+    const totalPrice=grpBks.reduce((s,x)=>s+(x.price||0),0);
+    const msg=`✅ تم قبول حجزك الشهري في ${fn}\n⏰ ${bTime}\n📅 ${dates}${totalPrice?`\n💰 الإجمالي: ${totalPrice} د.ل`:''}`;
     pushNotif(cPhone,msg,'✅');sendOsPush('phone',cPhone,'✅ تم قبول حجزك الشهري',msg.replace(/\n/g,' '));
+    if(SETTINGS.loyaltyEnabled!==false){const u=U.find(x=>x.phone===cPhone);if(u){grpBks.forEach(b=>{if(!b._pointsAwarded){u.points=(u.points||0)+(SETTINGS.pointsPerBooking||10);b._pointsAwarded=true;}});pushNotif(cPhone,`🏅 حصلت على ${(SETTINGS.pointsPerBooking||10)*grpBks.length} نقاط من حجزك الشهري في ${fn}`,'🏅');}}
     save();saveToSupabase();renderVendorBk();updateVendorReqBadge();toast('تم قبول الحجز الشهري ✅','s');addLog(`قبول شهري: ${grpBks[0].clientName}`);
   }
 }
@@ -4191,16 +4231,18 @@ function renderVendorFinance(){
   const todayBks=approved.filter(b=>b.date===today);const monthBks=approved.filter(b=>b.date.startsWith(thisMonth));
   const dailyTotal=todayBks.reduce((s,b)=>s+(+b.price||0),0);const monthTotal=monthBks.reduce((s,b)=>s+(+b.price||0),0);
   const totalRev=approved.reduce((s,b)=>s+(+b.price||0),0);
-  const commRate=SETTINGS.commissionRate||10;
-  const platformComm=Math.round(totalRev*commRate/100);
+  const _commRate=SETTINGS.commissionRate||10;
+  const _commMode=SETTINGS.commissionMode||'pct';
+  const platformComm=approved.reduce((s,b)=>s+calcComm(b),0);
   const vendorNet=totalRev-platformComm;
+  const _commLbl=_commMode==='fixed'?`${_commRate} د.ل/حجز`:`${_commRate}%`;
   c.innerHTML=`
   <div class="fin-card" style="margin-bottom:10px;"><div style="font-size:12px;color:var(--txm);margin-bottom:4px;">أرباح اليوم</div><div class="fin-num">${dailyTotal} <span style="font-size:14px;">د.ل</span></div><div style="font-size:11px;color:var(--txm);margin-top:4px;">${todayBks.length} حجز مؤكد</div></div>
   <div class="fin-card"><div style="font-size:12px;color:var(--txm);margin-bottom:4px;">أرباح الشهر الحالي</div><div class="fin-num">${monthTotal} <span style="font-size:14px;">د.ل</span></div><div style="font-size:11px;color:var(--txm);margin-top:4px;">${monthBks.length} حجز مؤكد</div></div>
   <div class="card" style="margin-top:10px;padding:14px;border-color:rgba(245,158,11,.3);">
     <div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--amber);">💰 ملخص الحساب الإجمالي</div>
     <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:13px;"><span style="color:var(--txm);">إجمالي الإيرادات</span><span style="font-weight:700;color:var(--neon);">${totalRev} د.ل</span></div>
-    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:13px;"><span style="color:var(--txm);">عمولة البرنامج (${commRate}%)</span><span style="font-weight:700;color:var(--red);">- ${platformComm} د.ل</span></div>
+    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:13px;"><span style="color:var(--txm);">عمولة البرنامج (${_commLbl})</span><span style="font-weight:700;color:var(--red);">- ${platformComm} د.ل</span></div>
     <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:14px;"><span style="font-weight:700;">صافي الملعب</span><span style="font-weight:900;color:var(--amber);">${vendorNet} د.ل</span></div>
   </div>
   <div class="stitle" style="padding:0;margin-top:14px;">آخر الحجوزات المؤكدة</div>
@@ -4537,7 +4579,8 @@ function renderAdminStatsTab(){
   const revChart=days.map((ds,i)=>{const pct=Math.round(dailyRevenue[i]/maxR*100);const lbl=new Date(ds+'T00:00:00').toLocaleDateString('ar',{weekday:'short'});return`<div class="chart-bar-row"><div class="chart-bar-label">${lbl}</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%;background:var(--amber);"></div></div><div class="chart-bar-val" style="color:var(--amber);">${dailyRevenue[i]}</div></div>`;}).join('');
   const totalRev=approved.reduce((s,b)=>s+(+b.price||0),0);
   const commRate=SETTINGS.commissionRate||10;
-  const totalComm=Math.round(totalRev*commRate/100);
+  const _cMode=SETTINGS.commissionMode||'pct';
+  const totalComm=approved.reduce((s,b)=>s+calcComm(b),0);
   const playerBks=B.filter(b=>b.bookedBy==='player'||(!b.bookedBy&&b.status!=='Cancelled'));
   const adminBks=B.filter(b=>b.bookedBy==='admin');
   const cancelledBks=B.filter(b=>b.status==='Rejected'||b.status==='Cancelled');
@@ -4549,7 +4592,7 @@ function renderAdminStatsTab(){
   <div class="hesba-grid">
     <div class="hesba-card"><div class="h-num">${approved.length}</div><div class="h-lbl">إجمالي الحجوزات</div></div>
     <div class="hesba-card"><div class="h-num">${totalRev}</div><div class="h-lbl">إجمالي الإيراد (رس)</div></div>
-    <div class="hesba-card"><div class="h-comm">${totalComm}</div><div class="h-lbl">عمولتنا (${commRate}%)</div></div>
+    <div class="hesba-card"><div class="h-comm">${totalComm}</div><div class="h-lbl">عمولتنا (${_cMode==='fixed'?commRate+' د.ل/حجز':commRate+'%'})</div></div>
     <div class="hesba-card"><div class="h-num">${U.filter(u=>u.role==='player').length}</div><div class="h-lbl">لاعبين مسجلين</div></div>
   </div>
   <div class="stitle" style="padding:0;margin-bottom:8px;margin-top:14px;">👤 مصدر الحجوزات</div>
@@ -6173,8 +6216,9 @@ function delField(id){
   const f = F.find(x=>x.id===id);
   if(f){
     if(!SETTINGS.deletedFieldsHesba) SETTINGS.deletedFieldsHesba=[];
-    const totalRev = B.filter(b=>b.fieldId===id&&b.status==='Approved').reduce((s,b)=>s+(+b.price||0),0);
-    const comm = Math.round(totalRev*(SETTINGS.commissionRate||10)/100);
+    const _delBks=B.filter(b=>b.fieldId===id&&b.status==='Approved');
+    const totalRev = _delBks.reduce((s,b)=>s+(+b.price||0),0);
+    const comm = _delBks.reduce((s,b)=>s+calcComm(b),0);
     SETTINGS.deletedFieldsHesba.push({id,name:f.name,deletedAt:new Date().toLocaleDateString('ar'),totalRev,comm});
   }
   F=F.filter(x=>x.id!==id);
@@ -6385,6 +6429,9 @@ function renderSettingsTab(){
   if(osInp)osInp.value=SETTINGS.osApiKey||'';
   const osSt=document.getElementById('os-status');
   if(osSt)osSt.innerHTML=SETTINGS.osApiKey?'<span style="color:var(--neon);">✅ REST API Key محفوظ</span>':'';
+  const mxBk=document.getElementById('max-bk-default');if(mxBk)mxBk.value=SETTINGS.maxBookingsDefault??2;
+  const mxMon=document.getElementById('max-mon-default');if(mxMon)mxMon.value=SETTINGS.maxMonthlyDefault??1;
+  const adPh=document.getElementById('admin-phone-inp');if(adPh)adPh.value=SETTINGS.adminPhone||'';
   const appTpl=document.getElementById('msg-approve-tpl');
   if(appTpl)appTpl.value=SETTINGS.approveMsg||'';
   const rejTpl=document.getElementById('msg-reject-tpl');
@@ -6426,6 +6473,17 @@ function togglePostRequire(){
   SETTINGS.postRequireAll=SETTINGS.postRequireAll===false?true:false;
   document.getElementById('post-require-toggle').className='toggle-sw '+(SETTINGS.postRequireAll?'on':'off');
   save();
+}
+function saveDefaultLimits(){
+  const bk=parseInt(document.getElementById('max-bk-default')?.value);
+  const mon=parseInt(document.getElementById('max-mon-default')?.value);
+  if(isNaN(bk)||bk<0||isNaN(mon)||mon<0){toast('قيمة غير صحيحة','e');return;}
+  SETTINGS.maxBookingsDefault=bk;SETTINGS.maxMonthlyDefault=mon;
+  save();toast(`تم حفظ الحدود: عادي=${bk} | شهري=${mon} ✅`,'s');
+}
+function saveAdminPhone(){
+  const ph=(document.getElementById('admin-phone-inp')?.value||'').trim();
+  SETTINGS.adminPhone=ph;save();toast('تم حفظ رقم الإدارة ✅','s');
 }
 function toggleMonthlyEnabled(){
   SETTINGS.monthlyEnabled=SETTINGS.monthlyEnabled===false?true:false;
@@ -6628,6 +6686,10 @@ function renderPhotosDisplay(f, containerId){
 
 function setVendorFieldFilter(fid,el){
   vendorFieldFilter=fid;
+  renderVendorBk();
+}
+function setVendorStatusFilter(v){
+  vendorStatusFilter=v;
   renderVendorBk();
 }
 function switchVendorSchedField(fid){
