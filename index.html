@@ -1822,7 +1822,7 @@ U.forEach(u=>{if(!u.points)u.points=0;if(!u.notifications)u.notifications=[];});
 // ════════════════════════════════════════════════
 //  SUPABASE CONFIG (قاعدة البيانات الرئيسية)
 // ════════════════════════════════════════════════
-const APP_VER='v215';
+const APP_VER='v217';
 let _isOffline=false;
 function checkOnline(){
   if(_isOffline){
@@ -3829,13 +3829,13 @@ function renderAcademySched(ds,vfs,cid){
   const hours=[...allHours].sort((a,b)=>parseHourFromFmt(a)-parseHourFromFmt(b));
   const dayOfWeek=new Date(ds+'T00:00:00').getDay();
   vfs.forEach(f=>{if(!f.closedHours[ds])f.closedHours[ds]=[];});
-  let html=`<table style="width:100%;border-collapse:separate;border-spacing:3px;font-size:11px;">
-    <thead><tr><th style="padding:5px 3px;background:var(--bg3);border-radius:6px;text-align:center;color:var(--txm);font-size:10px;">الوقت</th>`;
-  vfs.forEach(f=>{html+=`<th style="padding:5px 3px;background:var(--bg3);border-radius:6px;text-align:center;color:var(--txs);font-size:10px;">${f.name}</th>`;});
+  let html=`<table style="min-width:max-content;border-collapse:separate;border-spacing:3px;font-size:11px;">
+    <thead><tr><th style="padding:5px 6px;background:var(--bg3);border-radius:6px;text-align:center;color:var(--txm);font-size:10px;white-space:nowrap;min-width:52px;">الوقت</th>`;
+  vfs.forEach(f=>{html+=`<th style="padding:5px 4px;background:var(--bg3);border-radius:6px;text-align:center;color:var(--txs);font-size:10px;min-width:72px;">${f.name}</th>`;});
   html+=`</tr></thead><tbody>`;
   hours.forEach(t=>{
     html+=`<tr>`;
-    html+=`<td style="padding:4px 3px;text-align:center;font-weight:700;color:var(--txm);white-space:nowrap;">${t}</td>`;
+    html+=`<td style="padding:4px 6px;text-align:center;font-weight:700;color:var(--txm);white-space:nowrap;min-width:52px;">${t}</td>`;
     vfs.forEach(f=>{
       const inRange=fieldHours(f).includes(t);
       const bk=B.find(b=>b.fieldId===f.id&&b.date===ds&&b.time===t&&(b.status==='Pending'||b.status==='Approved'));
@@ -3860,7 +3860,7 @@ function renderAcademySched(ds,vfs,cid){
     html+=`</tr>`;
   });
   html+=`</tbody></table>`;
-  c.innerHTML=html;
+  c.innerHTML=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;">${html}</div>`;
 }
 function toggleHour(fid,ds,t,cid){
   const f=F.find(x=>x.id===fid);
@@ -3906,7 +3906,7 @@ function cancelFromSched(bid,fid,ds,cid){
   _qaCallback=(val)=>{
     if(val!=='cancel')return;
     b.status='Rejected';b._notified=false;
-    const cn=CU.role==='vendor'?`${CU.name||CU.fieldName} (صاحب ملعب)`:CU.role==='admin'?'الإدارة':`${CU.name} (لاعب)`;
+    const cn=CU.role==='vendor'?`${F.find(x=>x.id===b.fieldId)?.groupName||CU.name||CU.fieldName} (صاحب ملعب)`:CU.role==='admin'?'الإدارة':`${CU.name} (لاعب)`;
     b.cancelledBy=cn;b.cancelledAt=new Date().toLocaleString('ar-LY');
     pushNotif(b.clientPhone,`❌ تم إلغاء حجزك في ${fn} (${b.date} ${b.time})`,'❌');
     sendTgNotif(`🚫 <b>تم إلغاء حجز</b>\n👤 ${b.clientName}\n🏟 ${fn}\n📅 ${b.date} ${b.time}\n👮 بواسطة: ${cn}`);
@@ -4164,7 +4164,7 @@ function setBkStatus(id,st){
   const b=B.find(x=>String(x.id)===String(id));if(!b)return;
   if(st==='Rejected'){
     askRejectReason(async(reason)=>{
-      b.cancelledBy=`${CU.name||CU.fieldName} (صاحب ملعب)`;b.cancelledAt=new Date().toLocaleString('ar-LY');b.rejectReason=reason.trim();
+      b.cancelledBy=`${F.find(x=>x.id===b.fieldId)?.groupName||CU.name||CU.fieldName} (صاحب ملعب)`;b.cancelledAt=new Date().toLocaleString('ar-LY');b.rejectReason=reason.trim();
       b.status=st;b._notified=true;
       const fn=F.find(x=>x.id===b.fieldId)?.name;
       const bkTypeLabel=b.bookingType==='monthly'?'حجز شهري':'حجز عادي';
@@ -4205,7 +4205,7 @@ function setMonthlyGroupStatus(gk,status){
   const sortedDates=grpBks.slice().sort((a,z)=>a.date.localeCompare(z.date));
   if(status==='Rejected'){
     askRejectReason(async(reason)=>{
-      grpBks.forEach(b=>{b.status='Rejected';b._notified=true;b.cancelledBy=`${CU.name||CU.fieldName} (صاحب ملعب)`;b.cancelledAt=new Date().toLocaleString('ar-LY');b.rejectReason=reason.trim();});
+      grpBks.forEach(b=>{b.status='Rejected';b._notified=true;b.cancelledBy=`${F.find(x=>x.id===b.fieldId)?.groupName||CU.name||CU.fieldName} (صاحب ملعب)`;b.cancelledAt=new Date().toLocaleString('ar-LY');b.rejectReason=reason.trim();});
       const dates=sortedDates.map(x=>x.date).join(' | ');
       const msg=`❌ تم رفض حجزك الشهري في ${fn}\n⏰ ${bTime}\n📅 ${dates}${reason?`\n📝 السبب: ${reason}`:''}`;
       pushNotif(cPhone,msg,'❌');sendOsPush('phone',cPhone,'❌ تم رفض حجزك الشهري',msg.replace(/\n/g,' '));
